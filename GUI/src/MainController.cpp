@@ -18,6 +18,8 @@
  
 #include "MainController.h"
 
+using namespace std;
+
 MainController::MainController(int argc, char * argv[])
  : good(true),
    eFusion(0),
