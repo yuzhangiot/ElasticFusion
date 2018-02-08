@@ -49,6 +49,7 @@ MainController::MainController(int argc, char * argv[])
 
     if(logFile.length())
     {
+        cout << "log file path is validate" << endl;
         logReader = new RawLogReader(logFile, Parse::get().arg(argc, argv, "-f", empty) > -1);
     }
     else
@@ -273,6 +274,7 @@ void MainController::run()
                     *currentPose = groundTruthOdometry->getTransformation(logReader->timestamp);
                 }
 
+                // input: rgb, depth, output: updated RT, localModel and global model
                 eFusion->processFrame(logReader->rgb, logReader->depth, logReader->timestamp, currentPose, weightMultiplier);
 
                 if(currentPose)
@@ -293,6 +295,7 @@ void MainController::run()
 
         TICK("GUI");
 
+        // follow the current eye to the current pose
         if(gui->followPose->Get())
         {
             pangolin::OpenGlMatrix mv;
@@ -330,6 +333,7 @@ void MainController::run()
 
         gui->preCall();
 
+        // display icp informations, draw raw or filter data
         std::stringstream stri;
         stri << eFusion->getModelToModel().lastICPCount;
         gui->trackInliers->Ref().Set(stri.str());
@@ -361,6 +365,7 @@ void MainController::run()
             eFusion->getFeedbackBuffers().at(FeedbackBuffer::FILTERED)->render(gui->s_cam.GetProjectionModelViewMatrix(), pose, gui->drawNormals->Get(), gui->drawColors->Get());
         }
 
+        // draw overall global model  with fxaa or not
         if(gui->drawGlobalModel->Get())
         {
             glFinish();

@@ -267,7 +267,9 @@ void ElasticFusion::processFrame(const unsigned char * rgb,
 
     TICK("Preprocess");
 
+    // just bind texture:depth_raw to computePack:filter
     filterDepth();
+    // bind texture:depth_raw to computePack:metric, texture:depth_filter to computePack:metric_filter
     metriciseDepth();
 
     TOCK("Preprocess");
@@ -275,10 +277,11 @@ void ElasticFusion::processFrame(const unsigned char * rgb,
     //First run
     if(tick == 1)
     {
+        // bind texture:depth_metric and rgb to feedbackBuffer:raw, texture:depth_metric_filter to feedbackBuffer:filtered
         computeFeedbackBuffers();
-
+        // set feedbackBuffer raw and filter to globalModel
         globalModel.initialise(*feedbackBuffers[FeedbackBuffer::RAW], *feedbackBuffers[FeedbackBuffer::FILTERED]);
-
+        // copy rgb to cudares than deviceArray 2D, which is a 3 level pyramid
         frameToModel.initFirstRGB(textures[GPUTexture::RGB]);
     }
     else
@@ -290,18 +293,30 @@ void ElasticFusion::processFrame(const unsigned char * rgb,
         if(bootstrap || !inPose)
         {
             TICK("autoFill");
+            // from indexMap to imageBuff
             resize.image(indexMap.imageTex(), imageBuff);
+            // each pixel(include 3 chars, 3/4 of them > 0) 
             bool shouldFillIn = !denseEnough(imageBuff);
             TOCK("autoFill");
 
             TICK("odomInit");
             //WARNING initICP* must be called before initRGB*
+            // last frame
+            // input is texture vertex and normal, then transform current point p1 to next frame point p2:
+            // p2 = R * p1 + T, and transform current norm n1 to next frame frame norm n2:
+            // n2 = R * n1 + T
             frameToModel.initICPModel(shouldFillIn ? &fillIn.vertexTexture : indexMap.vertexTex(),
                                       shouldFillIn ? &fillIn.normalTexture : indexMap.normalTex(),
                                       maxDepthProcessed, currPose);
+            // input is texture rgb, then set depth from p1 to lastDepth, and rgb to lastImage
             frameToModel.initRGBModel((shouldFillIn || frameToFrameRGB) ? &fillIn.imageTexture : indexMap.imageTex());
 
+            // current frame
+            // input is texture depth filtered, generate current certex and normal
+            // vertex: px / (x - cx) = z / fx, py / (y - cy) = z / fy, pz = z
+            // normal: cross multi vec[(x,y), (x+1, y)] and vec[(x,y), (x, y+1)], then normalize
             frameToModel.initICP(textures[GPUTexture::DEPTH_FILTERED], maxDepthProcessed);
+            // input is texture rgb, then set depth from p1 to nextDepth, and rgb to nextImage
             frameToModel.initRGB(textures[GPUTexture::RGB]);
             TOCK("odomInit");
 
@@ -315,6 +330,19 @@ void ElasticFusion::processFrame(const unsigned char * rgb,
             Eigen::Matrix<float, 3, 3, Eigen::RowMajor> rot = currPose.topLeftCorner(3, 3);
 
             TICK("odom");
+            // use icp or rgb(direct) method to get next position, input and output is R and T, that is to say: updata T and R;
+            // rgb method: computeDerivativeImages() is to do sobel filter to nextImage
+            // so3 algorithm: compute newR and if converged then break, if diverging back to last and recompute
+            // so3 algorithm: so3Step() is to TODO ???
+            // rgb method: projectToPointCloud is to convert lastDepth to ppointClouds -> px / (x - cx) = z / fx, py / (y - cy) = z / fy, pz = z
+            // rgb method: computeRgbResidual is to: 1. sum all correspond pix diff(last frame and current frame)(cur(x,y) = D.KRK-1.last(x,y) + T)
+            // rgb method: computeRgbResidual then : 2. blockReduceSum and warpReducesum is to ??? TODO, output is rgbsize(nums) and sigma(sumdiffs)
+            // icp method: icpStep: input are current and last R,T,vertical,normal, output is A_icp(6x6), b_icp, residual(float2(diffs,nums))
+            // icp method: icpStep: search function: 1. current(u,v) -> current(vertical)(local) -> current(vertical(global)) -> last(vertical(local)) -> last(u,v)
+            // icp method: icpStep: search function: 2. after last(u,v), then -> last(vertical(global)(real)), last(norm);
+            // icp method: icpStep: search function: 3. current(norm(global)) = R * cur(norm(local)), then get norm(curr(v) - last(v)), norm(cross(cur(n)- last(n)))
+            // rgb method: rgbStep: inputs are outputs of computeRgbResidual, outputs are A_rgb(6x6), b_rgb(6x1)
+            // final output: updated trans and rot
             frameToModel.getIncrementalTransformation(trans,
                                                       rot,
                                                       rgbOnly,
@@ -326,6 +354,7 @@ void ElasticFusion::processFrame(const unsigned char * rgb,
 
             trackingOk = !reloc || frameToModel.lastICPError < 1e-04;
 
+            // if enable relocation: 
             if(reloc)
             {
                 if(!lost)
@@ -402,14 +431,18 @@ void ElasticFusion::processFrame(const unsigned char * rgb,
             weighting = largest;
         }
 
+        // range varity from 1 to 0.5
         weighting = std::max(1.0f - (weighting / largest), minWeight) * weightMultiplier;
 
         std::vector<Ferns::SurfaceConstraint> constraints;
 
+        // bind texture normal vertex and global model to indexMap(display)
         predict();
 
         Eigen::Matrix4f recoveryPose = currPose;
 
+        // global loop detection
+        // TODO: to learn explicity codes
         if(closeLoops)
         {
             lastFrameRecovery = false;
@@ -466,6 +499,7 @@ void ElasticFusion::processFrame(const unsigned char * rgb,
         }
 
         //If we didn't match to a fern
+        // Then excute a local loop contrain
         if(!lost && closeLoops && rawGraph.size() == 0)
         {
             //Only predict old view, since we just predicted the current view for the ferns (which failed!)
@@ -490,6 +524,7 @@ void ElasticFusion::processFrame(const unsigned char * rgb,
             Eigen::Vector3f trans = currPose.topRightCorner(3, 1);
             Eigen::Matrix<float, 3, 3, Eigen::RowMajor> rot = currPose.topLeftCorner(3, 3);
 
+        
             modelToModel.getIncrementalTransformation(trans,
                                                       rot,
                                                       false,
@@ -567,12 +602,14 @@ void ElasticFusion::processFrame(const unsigned char * rgb,
             }
         }
 
+        // 
         if(!rgbOnly && trackingOk && !lost)
         {
             TICK("indexMap");
             indexMap.predictIndices(currPose, tick, globalModel.model(), maxDepthProcessed, timeDelta);
             TOCK("indexMap");
 
+            // fuse different data in openGL
             globalModel.fuse(currPose,
                              tick,
                              textures[GPUTexture::RGB],
@@ -593,8 +630,10 @@ void ElasticFusion::processFrame(const unsigned char * rgb,
             //If we're deforming we need to predict the depth again to figure out which
             //points to update the timestamp's of, since a deformation means a second pose update
             //this loop
+            // local loop match condition
             if(rawGraph.size() > 0 && !fernAccepted)
             {
+                // 
                 indexMap.synthesizeDepth(currPose,
                                          globalModel.model(),
                                          maxDepthProcessed,
@@ -617,15 +656,18 @@ void ElasticFusion::processFrame(const unsigned char * rgb,
                               maxDepthProcessed,
                               fernAccepted);
         }
-    }
+    } // else
 
     poseGraph.push_back(std::pair<unsigned long long int, Eigen::Matrix4f>(tick, currPose));
     poseLogTimes.push_back(timestamp);
 
     TICK("sampleGraph");
 
+    // input is model, ouput is deformation
+    // openGL render function 
     localDeformation.sampleGraphModel(globalModel.model());
-
+    // input is deformation, output is deformation
+    // downsample local to global by 5
     globalDeformation.sampleGraphFrom(localDeformation);
 
     TOCK("sampleGraph");
@@ -634,6 +676,7 @@ void ElasticFusion::processFrame(const unsigned char * rgb,
 
     if(!lost)
     {
+        // add fillin texture, vertex and normal into Ferns
         processFerns();
         tick++;
     }
