@@ -33,6 +33,7 @@ ElasticFusion::ElasticFusion(const int timeDelta,
                              const float fernThresh,
                              const bool so3,
                              const bool frameToFrameRGB,
+                             const bool fixCamera,
                              const std::string fileName)
  : frameToModel(Resolution::getInstance().width(),
                 Resolution::getInstance().height(),
@@ -79,6 +80,7 @@ ElasticFusion::ElasticFusion(const int timeDelta,
    fernThresh(fernThresh),
    so3(so3),
    frameToFrameRGB(frameToFrameRGB),
+   fixCamera(fixCamera),
    depthCutoff(depthCut)
 {
     createTextures();
@@ -976,6 +978,11 @@ void ElasticFusion::setSo3(const bool & val)
 void ElasticFusion::setFrameToFrameRGB(const bool & val)
 {
     frameToFrameRGB = val;
+}
+
+void ElasticFusion::setFixCamera(const bool & val)
+{
+    fixCamera = val;
 }
 
 void ElasticFusion::setConfidenceThreshold(const float & val)

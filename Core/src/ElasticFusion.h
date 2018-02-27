@@ -55,6 +55,7 @@ class ElasticFusion
                       const float fernThresh = 0.3095,
                       const bool so3 = true,
                       const bool frameToFrameRGB = false,
+                      const bool fixCamera = false,
                       const std::string fileName = "");
 
         virtual ~ElasticFusion();
@@ -164,6 +165,12 @@ class ElasticFusion
          * @param val
          */
         EFUSION_API void setFrameToFrameRGB(const bool & val);
+
+        /**
+         * Turns on or off camera fix function for dynamic model
+         * @param val
+         */
+        EFUSION_API void setFixCamera(const bool & val);
 
         /**
          * Raw data fusion confidence threshold
@@ -324,6 +331,7 @@ class ElasticFusion
         float fernThresh;
         bool so3;
         bool frameToFrameRGB;
+        bool fixCamera;
         float depthCutoff;
 };
 

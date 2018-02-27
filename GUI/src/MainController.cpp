@@ -214,6 +214,7 @@ void MainController::launch()
                                         fernThresh,
                                         so3,
                                         frameToFrameRGB,
+                                        fixCamera,
                                         logReader->getFile());
         }
         else
@@ -545,6 +546,7 @@ void MainController::run()
         eFusion->setIcpWeight(gui->icpWeight->Get());
         eFusion->setSo3(gui->so3->Get());
         eFusion->setFrameToFrameRGB(gui->frameToFrameRGB->Get());
+        eFusion->setFixCamera(gui->fixCamera->Get());
 
         resetButton = pangolin::Pushed(*gui->reset);
 
