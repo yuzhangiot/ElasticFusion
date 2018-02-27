@@ -103,6 +103,7 @@ MainController::MainController(int argc, char * argv[])
     Parse::get().arg(argc, argv, "-s", start);
     Parse::get().arg(argc, argv, "-e", end);
 
+
     logReader->flipColors = Parse::get().arg(argc, argv, "-f", empty) > -1;
 
     openLoop = !groundTruthOdometry && Parse::get().arg(argc, argv, "-o", empty) > -1;
@@ -112,6 +113,7 @@ MainController::MainController(int argc, char * argv[])
     fastOdom = Parse::get().arg(argc, argv, "-fo", empty) > -1;
     rewind = Parse::get().arg(argc, argv, "-r", empty) > -1;
     frameToFrameRGB = Parse::get().arg(argc, argv, "-ftf", empty) > -1;
+    fixCamera = Parse::get().arg(argc, argv, "-fix", empty) > -1;
 
     gui = new GUI(logFile.length() == 0, Parse::get().arg(argc, argv, "-sc", empty) > -1);
 
@@ -124,6 +126,7 @@ MainController::MainController(int argc, char * argv[])
     gui->icpWeight->Ref().Set(icp);
     gui->so3->Ref().Set(so3);
     gui->frameToFrameRGB->Ref().Set(frameToFrameRGB);
+    gui->fixCamera->Ref().Set(fixCamera);
 
     resizeStream = new Resize(Resolution::getInstance().width(),
                               Resolution::getInstance().height(),

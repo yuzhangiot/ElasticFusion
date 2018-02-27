@@ -24,8 +24,12 @@
 #include "Tools/RawLogReader.h"
 #include "Tools/LiveLogReader.h"
 
+#include <iostream>
+
 #ifndef MAINCONTROLLER_H_
 #define MAINCONTROLLER_H_
+
+using namespace std;
 
 class MainController
 {
@@ -71,7 +75,8 @@ class MainController
              fastOdom,
              so3,
              rewind,
-             frameToFrameRGB;
+             frameToFrameRGB,
+             fixCamera;
 
         int framesToSkip;
         bool streaming;
