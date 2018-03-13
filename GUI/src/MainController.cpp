@@ -280,6 +280,12 @@ void MainController::run()
                     *currentPose = groundTruthOdometry->getTransformation(logReader->timestamp);
                 }
 
+                // fix camera position
+                if(fixCamera) {
+                    currentPose = new Eigen::Matrix4f;
+                    currentPose->setIdentity();
+                }
+
                 // input: rgb, depth, output: updated RT, localModel and global model
                 eFusion->processFrame(logReader->rgb, logReader->depth, logReader->timestamp, currentPose, weightMultiplier);
 
