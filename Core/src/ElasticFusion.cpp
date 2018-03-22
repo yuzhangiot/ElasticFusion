@@ -34,6 +34,7 @@ ElasticFusion::ElasticFusion(const int timeDelta,
                              const bool so3,
                              const bool frameToFrameRGB,
                              const bool fixCamera,
+                             const bool dynamic,
                              const std::string fileName)
  : frameToModel(Resolution::getInstance().width(),
                 Resolution::getInstance().height(),
@@ -81,6 +82,7 @@ ElasticFusion::ElasticFusion(const int timeDelta,
    so3(so3),
    frameToFrameRGB(frameToFrameRGB),
    fixCamera(fixCamera),
+   dynamic(dynamic),
    depthCutoff(depthCut)
 {
     createTextures();
@@ -622,11 +624,11 @@ void ElasticFusion::processFrame(const unsigned char * rgb,
             }
         } // match active and inactive end
 
-        // 
+        // deform and fusion
         if(!rgbOnly && trackingOk && !lost)
         {
             TICK("indexMap");
-            // globalModel to indexFrameBuffer
+            // globalModel project to indexFrameBuffer (nothing changes, just project)
             indexMap.predictIndices(currPose, tick, globalModel.model(), maxDepthProcessed, timeDelta);
             TOCK("indexMap");
 
@@ -646,14 +648,14 @@ void ElasticFusion::processFrame(const unsigned char * rgb,
                              weighting);
 
             TICK("indexMap");
-            // globalModel to indexFrameBuffer
+            // globalModel project to indexFrameBuffer (nothing changes, just project)
             indexMap.predictIndices(currPose, tick, globalModel.model(), maxDepthProcessed, timeDelta);
             TOCK("indexMap");
 
             //If we're deforming we need to predict the depth again to figure out which
             //points to update the timestamp's of, since a deformation means a second pose update
             //this loop
-            // local loop match condition
+            // global match failed and local loop match success
             if(rawGraph.size() > 0 && !fernAccepted)
             {
                 
@@ -666,7 +668,7 @@ void ElasticFusion::processFrame(const unsigned char * rgb,
                                          std::numeric_limits<unsigned short>::max());
             }
 
-            // indexMap to globalModel
+            // nodes to global map
             globalModel.clean(currPose,
                               tick,
                               indexMap.indexTex(),
@@ -881,9 +883,13 @@ void ElasticFusion::savePly()
     }
 
     // Close file
-    fs.close ();
+    fpout.close ();
 
     delete [] mapData;
+}
+
+void ElasticFusion::saveGltfV2() {
+  
 }
 
 Eigen::Vector3f ElasticFusion::rodrigues2(const Eigen::Matrix3f& matrix)
@@ -1007,6 +1013,11 @@ void ElasticFusion::setFrameToFrameRGB(const bool & val)
 void ElasticFusion::setFixCamera(const bool & val)
 {
     fixCamera = val;
+}
+
+void ElasticFusion::setDynamic(const bool & val)
+{
+  dynamic = val;
 }
 
 void ElasticFusion::setConfidenceThreshold(const float & val)

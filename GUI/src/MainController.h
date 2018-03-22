@@ -76,7 +76,8 @@ class MainController
              so3,
              rewind,
              frameToFrameRGB,
-             fixCamera;
+             fixCamera,
+             dynamic;
 
         int framesToSkip;
         bool streaming;

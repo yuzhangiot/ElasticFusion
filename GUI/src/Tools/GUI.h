@@ -130,6 +130,7 @@ class GUI
             so3 = new pangolin::Var<bool>("ui.SO(3)", true, true);
             frameToFrameRGB = new pangolin::Var<bool>("ui.Frame to frame RGB", false, true);
             fixCamera = new pangolin::Var<bool>("ui.Fix Camera position", false, true);
+            dynamic = new pangolin::Var<bool>("ui.Enable dynamic mode", false,true);
             fastOdom = new pangolin::Var<bool>("ui.Fast Odometry", false, true);
             rgbOnly = new pangolin::Var<bool>("ui.RGB only tracking", false, true);
             confidenceThreshold = new pangolin::Var<float>("ui.Confidence threshold", 10.0, 0.0, 24.0);
@@ -207,6 +208,7 @@ class GUI
             delete totalPoints;
             delete frameToFrameRGB;
             delete fixCamera;
+            delete dynamic;
             delete flipColors;
             delete drawFilteredCloud;
             delete drawNormals;
@@ -391,6 +393,7 @@ class GUI
                             * so3,
                             * frameToFrameRGB,
                             * fixCamera,
+                            * dynamic,
                             * fastOdom,
                             * followPose,
                             * drawRawCloud,

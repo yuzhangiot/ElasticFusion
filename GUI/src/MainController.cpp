@@ -114,6 +114,7 @@ MainController::MainController(int argc, char * argv[])
     rewind = Parse::get().arg(argc, argv, "-r", empty) > -1;
     frameToFrameRGB = Parse::get().arg(argc, argv, "-ftf", empty) > -1;
     fixCamera = Parse::get().arg(argc, argv, "-fix", empty) > -1;
+    dynamic = Parse::get().arg(argc, argv, "-dyn", empty) > -1;
 
     gui = new GUI(logFile.length() == 0, Parse::get().arg(argc, argv, "-sc", empty) > -1);
 
@@ -127,6 +128,7 @@ MainController::MainController(int argc, char * argv[])
     gui->so3->Ref().Set(so3);
     gui->frameToFrameRGB->Ref().Set(frameToFrameRGB);
     gui->fixCamera->Ref().Set(fixCamera);
+    gui->dynamic->Ref().Set(dynamic);
 
     resizeStream = new Resize(Resolution::getInstance().width(),
                               Resolution::getInstance().height(),
@@ -215,6 +217,7 @@ void MainController::launch()
                                         so3,
                                         frameToFrameRGB,
                                         fixCamera,
+                                        dynamic,
                                         logReader->getFile());
         }
         else
@@ -285,6 +288,7 @@ void MainController::run()
                     currentPose = new Eigen::Matrix4f;
                     currentPose->setIdentity();
                 }
+
 
                 // input: rgb, depth, output: updated RT, localModel and global model
                 eFusion->processFrame(logReader->rgb, logReader->depth, logReader->timestamp, currentPose, weightMultiplier);
@@ -553,6 +557,7 @@ void MainController::run()
         eFusion->setSo3(gui->so3->Get());
         eFusion->setFrameToFrameRGB(gui->frameToFrameRGB->Get());
         eFusion->setFixCamera(gui->fixCamera->Get());
+        eFusion->setDynamic(gui->dynamic->Get());
 
         resetButton = pangolin::Pushed(*gui->reset);
 

@@ -56,6 +56,7 @@ class ElasticFusion
                       const bool so3 = true,
                       const bool frameToFrameRGB = false,
                       const bool fixCamera = false,
+                      const bool dynamic = false,
                       const std::string fileName = "");
 
         virtual ~ElasticFusion();
@@ -173,6 +174,12 @@ class ElasticFusion
         EFUSION_API void setFixCamera(const bool & val);
 
         /**
+         * Turns on or off dynamic switch
+         * @param val
+         */
+        EFUSION_API void setDynamic(const bool & val);
+
+        /**
          * Raw data fusion confidence threshold
          * @param val default value is 10, but you can play around with this
          */
@@ -255,6 +262,11 @@ class ElasticFusion
         EFUSION_API void savePly();
 
         /**
+         * Save out a gltf version 2 file of the current model
+         */
+        EFUSION_API void saveGltfV2();
+
+        /**
          * Renders a normalised view of the input raw depth for displaying as an OpenGL texture
          * (this is stored under textures[GPUTexture::DEPTH_NORM]
          * @param minVal minimum depth value to render
@@ -332,6 +344,7 @@ class ElasticFusion
         bool so3;
         bool frameToFrameRGB;
         bool fixCamera;
+        bool dynamic;
         float depthCutoff;
 };
 
