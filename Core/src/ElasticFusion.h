@@ -33,6 +33,7 @@
 #include "Ferns.h"
 #include "PoseMatch.h"
 #include "Defines.h"
+#include "WarpField.h"
 
 #include <iomanip>
 #include <pangolin/gl/glcuda.h>

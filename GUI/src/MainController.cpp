@@ -366,7 +366,7 @@ void MainController::run()
 
         Eigen::Matrix4f pose = eFusion->getCurrPose();
 
-        if(gui->drawRawCloud->Get() || gui->drawFilteredCloud->Get())
+        if(gui->drawRawCloud->Get() || gui->drawFilteredCloud->Get() || gui->dynamic->Get())
         {
             eFusion->computeFeedbackBuffers();
         }
@@ -381,8 +381,15 @@ void MainController::run()
             eFusion->getFeedbackBuffers().at(FeedbackBuffer::FILTERED)->render(gui->s_cam.GetProjectionModelViewMatrix(), pose, gui->drawNormals->Get(), gui->drawColors->Get());
         }
 
+        bool closeGlobal = false;
+        if(gui->dynamic->Get())
+        {
+            closeGlobal = true;
+            eFusion->getFeedbackBuffers().at(FeedbackBuffer::FILTERED)->render(gui->s_cam.GetProjectionModelViewMatrix(), pose, gui->drawNormals->Get(), gui->drawColors->Get());
+        }
+
         // draw overall global model  with fxaa or not
-        if(gui->drawGlobalModel->Get())
+        if(gui->drawGlobalModel->Get() && !closeGlobal)
         {
             glFinish();
             TICK("Global");
