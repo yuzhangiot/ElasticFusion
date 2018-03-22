@@ -89,6 +89,9 @@ ElasticFusion::ElasticFusion(const int timeDelta,
     createCompute();
     createFeedbackBuffers();
 
+    // init dynamic related classes
+    createWarp();
+
     std::string filename = fileName;
     filename.append(".freiburg");
 
@@ -158,6 +161,15 @@ ElasticFusion::~ElasticFusion()
     }
 
     feedbackBuffers.clear();
+
+    if (warp_)
+    {
+      delete warp_;
+    }
+}
+
+void ElasticFusion::createWarp() {
+  warp_ = new WarpField();
 }
 
 void ElasticFusion::createTextures()

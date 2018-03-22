@@ -295,6 +295,8 @@ class ElasticFusion
         void createCompute();
         void createFeedbackBuffers();
 
+        void createWarp();
+
         void filterDepth();
         void metriciseDepth();
 
@@ -347,6 +349,9 @@ class ElasticFusion
         bool fixCamera;
         bool dynamic;
         float depthCutoff;
+
+        // dynamic related variables
+        WarpField* warp_;
 };
 
 #endif /* ELASTICFUSION_H_ */
