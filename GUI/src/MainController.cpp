@@ -385,7 +385,19 @@ void MainController::run()
         if(gui->dynamic->Get())
         {
             closeGlobal = true;
-            eFusion->getFeedbackBuffers().at(FeedbackBuffer::FILTERED)->render(gui->s_cam.GetProjectionModelViewMatrix(), pose, gui->drawNormals->Get(), gui->drawColors->Get());
+            glFinish();
+            eFusion->getDynamicModel().renderPointCloud(gui->s_cam.GetProjectionModelViewMatrix(),
+                                                        eFusion->getConfidenceThreshold(),
+                                                        gui->drawUnstable->Get(),
+                                                        gui->drawNormals->Get(),
+                                                        gui->drawColors->Get(),
+                                                        gui->drawPoints->Get(),
+                                                        gui->drawWindow->Get(),
+                                                        gui->drawTimes->Get(),
+                                                        eFusion->getTick(),
+                                                        eFusion->getTimeDelta());
+
+            // eFusion->getFeedbackBuffers().at(FeedbackBuffer::FILTERED)->render(gui->s_cam.GetProjectionModelViewMatrix(), pose, gui->drawNormals->Get(), gui->drawColors->Get());
         }
 
         // draw overall global model  with fxaa or not

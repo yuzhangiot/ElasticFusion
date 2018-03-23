@@ -305,6 +305,9 @@ void ElasticFusion::processFrame(const unsigned char * rgb,
         // output : globalModel's vbos.first and vbos.second
         globalModel.initialise(*feedbackBuffers[FeedbackBuffer::RAW], *feedbackBuffers[FeedbackBuffer::FILTERED]);
 
+        // initial dynamic model
+        dynamicModel.initialise(*feedbackBuffers[FeedbackBuffer::RAW], *feedbackBuffers[FeedbackBuffer::FILTERED]);
+
         // copy rgb to lastNextImage[0] then a 3 level pyramid
         frameToModel.initFirstRGB(textures[GPUTexture::RGB]);
     }
@@ -467,6 +470,9 @@ void ElasticFusion::processFrame(const unsigned char * rgb,
 
         // globalModel to indexMap, then both indexMap and origin rgb && depth to fillIn
         predict();
+
+        // dynamicModel to indexMapDyn
+        predictDyn();
 
         Eigen::Matrix4f recoveryPose = currPose;
 
@@ -767,6 +773,42 @@ void ElasticFusion::predict()
     TOCK("IndexMap::ACTIVE");
 }
 
+void ElasticFusion::predictDyn()
+{
+    TICK("IndexMap::ACTIVE");
+
+    if(lastFrameRecovery)
+    {
+        indexMapDyn.combinedPredict(currPose,
+                                 dynamicModel.model(),
+                                 maxDepthProcessed,
+                                 confidenceThreshold,
+                                 0,
+                                 tick,
+                                 timeDelta,
+                                 IndexMap::ACTIVE);
+    }
+    else
+    {
+        indexMapDyn.combinedPredict(currPose,
+                                 dynamicModel.model(),
+                                 maxDepthProcessed,
+                                 confidenceThreshold,
+                                 tick,
+                                 tick,
+                                 timeDelta,
+                                 IndexMap::ACTIVE);
+    }
+
+    TICK("FillIn");
+    fillInDyn.vertex(indexMapDyn.vertexTex(), textures[GPUTexture::DEPTH_FILTERED], lost);
+    fillInDyn.normal(indexMapDyn.normalTex(), textures[GPUTexture::DEPTH_FILTERED], lost);
+    fillInDyn.image(indexMapDyn.imageTex(), textures[GPUTexture::RGB], lost || frameToFrameRGB);
+    TOCK("FillIn");
+
+    TOCK("IndexMap::ACTIVE");
+}
+
 void ElasticFusion::metriciseDepth()
 {
     std::vector<Uniform> uniforms;
@@ -951,15 +993,24 @@ Eigen::Vector3f ElasticFusion::rodrigues2(const Eigen::Matrix3f& matrix)
     return Eigen::Vector3d(rx, ry, rz).cast<float>();
 }
 
-//Sad times ahead
 IndexMap & ElasticFusion::getIndexMap()
 {
     return indexMap;
 }
 
+IndexMap & ElasticFusion::getIndexMapDyn()
+{
+    return indexMapDyn;
+}
+
 GlobalModel & ElasticFusion::getGlobalModel()
 {
     return globalModel;
+}
+
+DynamicModel & ElasticFusion::getDynamicModel()
+{
+    return dynamicModel;
 }
 
 Ferns & ElasticFusion::getFerns()

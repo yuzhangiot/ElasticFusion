@@ -27,6 +27,50 @@ public:
     static const int MAX_VERTICES;
     static const int NODE_TEXTURE_DIMENSION;
     static const int MAX_NODES;
+
+
+    EFUSION_API void renderPointCloud(pangolin::OpenGlMatrix mvp,
+                          const float threshold,
+                          const bool drawUnstable,
+                          const bool drawNormals,
+                          const bool drawColors,
+                          const bool drawPoints,
+                          const bool drawWindow,
+                          const bool drawTimes,
+                          const int time,
+                          const int timeDelta);
+
+    EFUSION_API const std::pair<GLuint, GLuint> & model();
+
+    void fuse(const Eigen::Matrix4f & pose,
+              const int & time,
+              GPUTexture * rgb,
+              GPUTexture * depthRaw,
+              GPUTexture * depthFiltered,
+              GPUTexture * indexMap,
+              GPUTexture * vertConfMap,
+              GPUTexture * colorTimeMap,
+              GPUTexture * normRadMap,
+              const float depthCutoff,
+              const float confThreshold,
+              const float weighting);
+
+    void clean(const Eigen::Matrix4f & pose,
+               const int & time,
+               GPUTexture * indexMap,
+               GPUTexture * vertConfMap,
+               GPUTexture * colorTimeMap,
+               GPUTexture * normRadMap,
+               GPUTexture * depthMap,
+               const float confThreshold,
+               std::vector<float> & graph,
+               const int timeDelta,
+               const float maxDepth,
+               const bool isFern);
+
+    EFUSION_API unsigned int lastCount();
+
+    Eigen::Vector4f * downloadMap();
 	
 
 private:

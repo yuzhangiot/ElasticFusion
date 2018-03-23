@@ -86,16 +86,34 @@ class ElasticFusion
         EFUSION_API void predict();
 
         /**
+         * Predicts the current view of the scene, updates the [vertex/normal/image]Tex() members
+         * of the indexMapDyn class
+         */
+        EFUSION_API void predictDyn();
+
+        /**
          * This class contains all of the predicted renders
          * @return reference
          */
         EFUSION_API IndexMap & getIndexMap();
 
         /**
+         * This class contrains all of the predicted renders for dynamic fusion
+         * @return reference
+         */
+        EFUSION_API IndexMap & getIndexMapDyn();
+
+        /**
          * This class contains the surfel map
          * @return
          */
         EFUSION_API GlobalModel & getGlobalModel();
+
+        /**
+         * This class contains the dynamic model surfel map
+         * @return
+         */
+        EFUSION_API DynamicModel & getDynamicModel();
 
         /**
          * This class contains the fern keyframe database
@@ -279,10 +297,13 @@ class ElasticFusion
         //Here be dragons
     private:
         IndexMap indexMap;
+        IndexMap indexMapDyn;
         RGBDOdometry frameToModel;
         RGBDOdometry modelToModel;
         GlobalModel globalModel;
+        DynamicModel dynamicModel;
         FillIn fillIn;
+        FillIn fillInDyn;
         Ferns ferns;
         Deformation localDeformation;
         Deformation globalDeformation;
