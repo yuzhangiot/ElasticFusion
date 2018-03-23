@@ -396,6 +396,7 @@ void MainController::run()
 
             if(gui->drawFxaa->Get())
             {
+                std::cout << "with FXAA" << std::endl;
                 gui->drawFXAA(gui->s_cam.GetProjectionModelViewMatrix(),
                               gui->s_cam.GetModelViewMatrix(),
                               eFusion->getGlobalModel().model(),
@@ -406,6 +407,7 @@ void MainController::run()
             }
             else
             {
+                std::cout << "without FXAA" << std::endl;
                 eFusion->getGlobalModel().renderPointCloud(gui->s_cam.GetProjectionModelViewMatrix(),
                                                            eFusion->getConfidenceThreshold(),
                                                            gui->drawUnstable->Get(),

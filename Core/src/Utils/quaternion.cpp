@@ -1,8 +1,8 @@
 #include "quaternion.h"
 
 
-
-Quaternion::Quaternion():
+template<typename T>
+Quaternion<T>::Quaternion():
 w_(1),
 x_(0),
 y_(0),
@@ -11,7 +11,8 @@ z_(0)
 
 }
 
-Quaternion::Quaternion(T w, T x, T y, T z):
+template<typename T>
+Quaternion<T>::Quaternion(T w, T x, T y, T z):
 w_(w),
 x_(x),
 y_(y),
@@ -46,7 +47,7 @@ z_(z)
 // 	    normalize();
 // }
 
-
-Quaternion::~Quaternion() {
+template<typename T>
+Quaternion<T>::~Quaternion() {
 
 }

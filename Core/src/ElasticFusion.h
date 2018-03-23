@@ -29,6 +29,7 @@
 #include "Shaders/FillIn.h"
 #include "Deformation.h"
 #include "GlobalModel.h"
+#include "DynamicModel.h"
 #include "IndexMap.h"
 #include "Ferns.h"
 #include "PoseMatch.h"
