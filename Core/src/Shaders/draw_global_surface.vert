@@ -41,7 +41,7 @@ out int timeDelta0;
 
 void main()
 {
-    if(position.w > threshold || unstable == 1)
+    if(true || position.w > threshold || unstable == 1)
     {
         colorType0 = colorType;
         drawWindow0 = drawWindow;

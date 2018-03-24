@@ -15,8 +15,8 @@ DynamicModel::DynamicModel()
    initProgram(loadProgramFromFile("init_unstable.vert")),
    drawProgram(loadProgramFromFile("draw_feedback.vert", "draw_feedback.frag")),
    drawSurfelProgram(loadProgramFromFile("draw_global_surface.vert", "draw_global_surface.frag", "draw_global_surface.geom")),
-   dataProgram(loadProgramFromFile("data.vert", "data.frag", "data.geom")),
-   updateProgram(loadProgramFromFile("update.vert")),
+   dataProgram(loadProgramFromFile("data_dyn.vert", "data_dyn.frag", "data_dyn.geom")),
+   updateProgram(loadProgramGeomFromFile("update_dyn.vert","update_dyn.geom")),
    unstableProgram(loadProgramGeomFromFile("copy_unstable.vert", "copy_unstable.geom")),
    renderBuffer(TEXTURE_DIMENSION, TEXTURE_DIMENSION),
    updateMapVertsConfs(TEXTURE_DIMENSION, TEXTURE_DIMENSION, GL_RGBA32F, GL_LUMINANCE, GL_FLOAT),
@@ -294,17 +294,18 @@ const std::pair<GLuint, GLuint> & DynamicModel::model()
 
 void DynamicModel::fuse(const Eigen::Matrix4f & pose,
                        const int & time,
-                       GPUTexture * rgb,
-                       GPUTexture * depthRaw,
-                       GPUTexture * depthFiltered,
-                       GPUTexture * indexMap,
-                       GPUTexture * vertConfMap,
-                       GPUTexture * colorTimeMap,
-                       GPUTexture * normRadMap,
+                       GPUTexture * rgb, // current frame rgb
+                       GPUTexture * depthRaw, // current frame raw depth
+                       GPUTexture * depthFiltered, // current frame filter depth
+                       GPUTexture * indexMap, //predict color
+                       GPUTexture * vertConfMap, // predict vert confidence
+                       GPUTexture * colorTimeMap, // predict color and time
+                       GPUTexture * normRadMap, // predict normal
                        const float depthCutoff,
                        const float confThreshold,
                        const float weighting)
 {
+	/*
     TICK("Fuse::Data");
     //This first part does data association and computes the vertex to merge with, storing
     //in an array that sets which vertices to update by index
@@ -392,6 +393,7 @@ void DynamicModel::fuse(const Eigen::Matrix4f & pose,
 
     glFinish();
     TOCK("Fuse::Data");
+    */
 
     TICK("Fuse::Update");
     //Next we update the vertices at the indexes stored in the update textures
@@ -399,22 +401,22 @@ void DynamicModel::fuse(const Eigen::Matrix4f & pose,
     //update vertex by new = (a*w_a + b*w_b) / (w_a + w_b)
     updateProgram->Bind();
 
-    updateProgram->setUniform(Uniform("vertSamp", 0));
-    updateProgram->setUniform(Uniform("colorSamp", 1));
-    updateProgram->setUniform(Uniform("normSamp", 2));
+    updateProgram->setUniform(Uniform("gSampler", 0));
+    updateProgram->setUniform(Uniform("cSampler", 1));
     updateProgram->setUniform(Uniform("texDim", (float)TEXTURE_DIMENSION));
     updateProgram->setUniform(Uniform("time", time));
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbos[target].first);
+    updateProgram->setUniform(Uniform("cam", Eigen::Vector4f(Intrinsics::getInstance().cx(),
+                                                     Intrinsics::getInstance().cy(),
+                                                     1.0 / Intrinsics::getInstance().fx(),
+                                                     1.0 / Intrinsics::getInstance().fy())));
+    updateProgram->setUniform(Uniform("threshold", 0.0f));
+    updateProgram->setUniform(Uniform("cols", (float)Resolution::getInstance().cols()));
+    updateProgram->setUniform(Uniform("rows", (float)Resolution::getInstance().rows()));
+    updateProgram->setUniform(Uniform("maxDepth", depthCutoff));
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, Vertex::SIZE, 0);
-
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, Vertex::SIZE, reinterpret_cast<GLvoid*>(sizeof(Eigen::Vector4f)));
-
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, Vertex::SIZE, reinterpret_cast<GLvoid*>(sizeof(Eigen::Vector4f) * 2));
+    glBindBuffer(GL_ARRAY_BUFFER, uvo);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
     glEnable(GL_RASTERIZER_DISCARD);
 
@@ -425,26 +427,26 @@ void DynamicModel::fuse(const Eigen::Matrix4f & pose,
     glBeginTransformFeedback(GL_POINTS);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, updateMapVertsConfs.texture->tid);
+    glBindTexture(GL_TEXTURE_2D, depthFiltered->texture->tid);
 
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, updateMapColorsTime.texture->tid);
+    glBindTexture(GL_TEXTURE_2D, rgb->texture->tid);
 
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, updateMapNormsRadii.texture->tid);
+    glDrawArrays(GL_POINTS, 0, Resolution::getInstance().numPixels());
 
-    glDrawTransformFeedback(GL_POINTS, vbos[target].second);
+    // glDrawTransformFeedback(GL_POINTS, vbos[target].second);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+    glActiveTexture(GL_TEXTURE0);
 
     glEndTransformFeedback();
 
     glDisable(GL_RASTERIZER_DISCARD);
 
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glActiveTexture(GL_TEXTURE0);
+    
 
     glDisableVertexAttribArray(0);
-    glDisableVertexAttribArray(1);
-    glDisableVertexAttribArray(2);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, 0);
 

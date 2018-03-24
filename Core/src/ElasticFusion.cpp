@@ -648,6 +648,7 @@ void ElasticFusion::processFrame(const unsigned char * rgb,
             TICK("indexMap");
             // globalModel project to indexFrameBuffer (nothing changes, just project)
             indexMap.predictIndices(currPose, tick, globalModel.model(), maxDepthProcessed, timeDelta);
+            indexMapDyn.predictIndices(currPose, tick, dynamicModel.model(), maxDepthProcessed, timeDelta);
             TOCK("indexMap");
 
             // 1.pick vertex need to update
@@ -665,9 +666,24 @@ void ElasticFusion::processFrame(const unsigned char * rgb,
                              confidenceThreshold,
                              weighting);
 
+            // std::cout << "rawGraph' size: " << rawGraph.size() << std::endl;
+            dynamicModel.fuse(currPose,
+                             tick,
+                             textures[GPUTexture::RGB],
+                             textures[GPUTexture::DEPTH_METRIC],
+                             textures[GPUTexture::DEPTH_METRIC_FILTERED],
+                             indexMapDyn.indexTex(),
+                             indexMapDyn.vertConfTex(),
+                             indexMapDyn.colorTimeTex(),
+                             indexMapDyn.normalRadTex(),
+                             maxDepthProcessed,
+                             confidenceThreshold,
+                             weighting);
+
             TICK("indexMap");
             // globalModel project to indexFrameBuffer (nothing changes, just project)
             indexMap.predictIndices(currPose, tick, globalModel.model(), maxDepthProcessed, timeDelta);
+            indexMapDyn.predictIndices(currPose, tick, dynamicModel.model(), maxDepthProcessed, timeDelta);
             TOCK("indexMap");
 
             //If we're deforming we need to predict the depth again to figure out which
