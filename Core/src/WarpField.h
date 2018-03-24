@@ -2,6 +2,7 @@
 #define WARPFIELD_H_
 
 #include "DualQuaternion.h"
+#include "Utils/nanoflann.hpp"
 
 struct deformation_node
 {
