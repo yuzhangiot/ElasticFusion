@@ -641,18 +641,7 @@ std::vector<Eigen::Vector4f> RGBDOdometry::getCurVertex(int points_num) {
     std::vector<Eigen::Vector4f> live(height * width);
 
     vmaps_curr_[0].download(&vmap_curr_host, vmaps_curr_[0].cols() * sizeof(float));
-
-    // for (int i = 0; i < width * 3; ++i)
-    // {
-    //     for (int j = 0; j < height; ++i)
-    //     {
-    //         std::cout << vmap_curr_host[j][i] << ", ";
-    //         std::cout << vmap_curr_host[j][i + 1] << ", ";
-    //         std::cout << vmap_curr_host[j][i + 2] << std::endl;
-    //     }
-    // }
     
-
 
    for (int i = 0; i < height; ++i)
     {
@@ -670,7 +659,26 @@ std::vector<Eigen::Vector4f> RGBDOdometry::getCurVertex(int points_num) {
     return live;
 }
 
+std::vector<Eigen::Vector3f> RGBDOdometry::getCurNormal() {
+    float nmaps_curr_host[height][width * 3];
 
+    std::vector<Eigen::Vector3f> liveNormal(height * width);
+
+    nmaps_curr_[0].download(&nmaps_curr_host, nmaps_curr_[0].cols() * sizeof(float));
+
+    for (int i = 0; i < height; ++i)
+    {
+        for (int j = 0; j < width * 3; ++j)
+        {
+            int out = i * width + j / 3;
+            liveNormal[out][0] = nmaps_curr_host[i][j];
+            liveNormal[out][1] = nmaps_curr_host[i][j + 1];
+            liveNormal[out][2] = nmaps_curr_host[i][j + 2];
+        }
+    }
+
+    return liveNormal;
+}
 
 
 

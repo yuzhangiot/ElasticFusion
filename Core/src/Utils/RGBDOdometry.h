@@ -66,6 +66,8 @@ class RGBDOdometry
 
         std::vector<Eigen::Vector4f> getCurVertex(int);
 
+        std::vector<Eigen::Vector3f> getCurNormal();
+
         float lastICPError;
         float lastICPCount;
         float lastRGBError;

@@ -775,7 +775,7 @@ void ElasticFusion::dynamicFusion() {
     // }
   }
                              
-  //2.copy current frame's point cloud
+  //2 copy current frame's point cloud and normal
 
   // input is texture depth filtered, generate current vertex and normal
   // vertex: px / (x - cx) = z / fx, py / (y - cy) = z / fy, pz = z : vmaps_curr_
@@ -787,6 +787,9 @@ void ElasticFusion::dynamicFusion() {
 
   // download from vmaps_curr_ to live
   std::vector<Eigen::Vector4f> live = frameToModelDyn.getCurVertex(points_num);
+
+  // download from nmaps_curr_ to liveNormal
+  std::vector<Eigen::Vector3f> liveNormal = frameToModelDyn.getCurNormal();
 
 }
 
