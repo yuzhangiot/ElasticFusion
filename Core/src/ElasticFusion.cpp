@@ -670,6 +670,8 @@ void ElasticFusion::processFrame(const unsigned char * rgb,
                              confidenceThreshold,
                              weighting);
 
+            dynamicFusion();
+
             // std::cout << "rawGraph' size: " << rawGraph.size() << std::endl;
             dynamicModel.fuse(currPose,
                              tick,
@@ -748,6 +750,22 @@ void ElasticFusion::processFrame(const unsigned char * rgb,
     }
 
     TOCK("Run");
+}
+
+void ElasticFusion::dynamicFusion() {
+  //1.copy point clouds from dynamicModels to canonical
+  auto points_num = dynamicModel.lastCount();
+  std::vector<Eigen::Vector4f> canonical(points_num);
+  Eigen::Vector4f * mapData = dynamicModel.downloadMap();
+
+  for (int i = 0; i < points_num; ++i) {
+    Eigen::Vector4f pos = mapData[(i * 3) + 0];
+
+    // if(pos[3] > confidenceThreshold) {
+    //get current view port's point cloud
+    canonical[i] = currPose.inverse() * pos;
+    // }
+  }
 }
 
 void ElasticFusion::processFerns()

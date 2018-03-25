@@ -326,6 +326,8 @@ class ElasticFusion
 
         void processFerns();
 
+        void dynamicFusion();
+
         Eigen::Vector3f rodrigues2(const Eigen::Matrix3f& matrix);
 
         Eigen::Matrix4f currPose;

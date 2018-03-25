@@ -59,10 +59,10 @@ void WarpField::init(DynamicModel& dynamicModel) {
 	for (int i = 0; i < point_num; i += step) {
 		Eigen::Vector4f pos = mapData[(i * 3) + 0];
 
-        if(pos[3] > confidenceThreshold) {
+        // if(pos[3] > confidenceThreshold) {
         	nodes_->at(i).transform = utils::DualQuaternion<float>();
             nodes_->at(i).vertex = pos;
-        }
+        // }
 	}
 	buildKDTree();
 }
