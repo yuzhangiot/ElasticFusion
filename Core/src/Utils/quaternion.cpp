@@ -1,25 +1,25 @@
 #include "quaternion.h"
 
 
-template<typename T>
-Quaternion<T>::Quaternion():
-w_(1),
-x_(0),
-y_(0),
-z_(0)
-{
+// template<typename T>
+// Quaternion<T>::Quaternion():
+// w_(1),
+// x_(0),
+// y_(0),
+// z_(0)
+// {
 
-}
+// }
 
-template<typename T>
-Quaternion<T>::Quaternion(T w, T x, T y, T z):
-w_(w),
-x_(x),
-y_(y),
-z_(z)
-{
+// template<typename T>
+// Quaternion<T>::Quaternion(T w, T x, T y, T z):
+// w_(w),
+// x_(x),
+// y_(y),
+// z_(z)
+// {
 
-}
+// }
 
 // Quaternion::Quaternion(const Eigen::Vector3f& normal) {
 // 	Eigen::Vector3f a(1, 0, 0);
@@ -47,7 +47,7 @@ z_(z)
 // 	    normalize();
 // }
 
-template<typename T>
-Quaternion<T>::~Quaternion() {
+// template<typename T>
+// Quaternion<T>::~Quaternion() {
 
-}
+// }

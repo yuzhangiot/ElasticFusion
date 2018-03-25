@@ -7,17 +7,17 @@ template<typename T>
 class Quaternion
 {
 public:
-	Quaternion();
-	Quaternion(T w, T x, T y, T z);
+	Quaternion(){};
+	// Quaternion(T w, T x, T y, T z);
 	// Quaternion(const Eigen::Vector3f& normal);
-	~Quaternion();
+	~Quaternion(){};
 
 
 private:
-	T w_;
-	T x_;
-	T y_;
-	T z_;
+	// T w_;
+	// T x_;
+	// T y_;
+	// T z_;
 };
 
 
