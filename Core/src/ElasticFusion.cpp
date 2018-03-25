@@ -90,7 +90,7 @@ ElasticFusion::ElasticFusion(const int timeDelta,
     createFeedbackBuffers();
 
     // init dynamic related classes
-    createWarp();
+    createWarp(confidence);
 
     std::string filename = fileName;
     filename.append(".freiburg");
@@ -168,8 +168,8 @@ ElasticFusion::~ElasticFusion()
     }
 }
 
-void ElasticFusion::createWarp() {
-  warp_ = new WarpField();
+void ElasticFusion::createWarp(float confidenceThreshold) {
+  warp_ = new WarpField(confidenceThreshold);
 }
 
 void ElasticFusion::createTextures()
@@ -310,6 +310,10 @@ void ElasticFusion::processFrame(const unsigned char * rgb,
 
         // copy rgb to lastNextImage[0] then a 3 level pyramid
         frameToModel.initFirstRGB(textures[GPUTexture::RGB]);
+
+        // input: globalModels's vbos
+        // output: warp's nodes_ and buildKDTree
+        warp_->init(dynamicModel);
     }
     else
     {

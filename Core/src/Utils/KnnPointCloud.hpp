@@ -7,13 +7,13 @@
 namespace utils{
 	struct PointCloud
 	    {
-	        std::vector<Eigen::Vector3f> pts;
+	        std::vector<Eigen::Vector4f> pts;
 
 	        // Must return the number of data points
 	        inline size_t kdtree_get_point_count() const { return pts.size(); }
 
 	        // Returns the distance between the vector "p1[0:size-1]" and the data point with index "idx_p2" stored in the class:
-	        inline float kdtree_distance(const Eigen::Vector3f p1, const size_t idx_p2,size_t /*size*/) const
+	        inline float kdtree_distance(const Eigen::Vector4f p1, const size_t idx_p2,size_t /*size*/) const
 	        {
 	            const float d0=p1[0] - pts[idx_p2][0];
 	            const float d1=p1[1] - pts[idx_p2][1];

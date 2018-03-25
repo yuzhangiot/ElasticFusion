@@ -4,6 +4,7 @@
 #include "Utils/DualQuaternion.h"
 #include "Utils/nanoflann.hpp"
 #include "Utils/KnnPointCloud.hpp"
+#include "DynamicModel.h"
 
 #define KNN_NEIGHBOURS 8
 
@@ -15,21 +16,27 @@ typedef nanoflann::KDTreeSingleIndexAdaptor<
 
 struct deformation_node
 {
-	Eigen::Vector3f vertex;
+	Eigen::Vector4f vertex;
 	utils::DualQuaternion<float> transform;
-	float weight = 0;
 };
 
 class WarpField
 {
 public:
-	WarpField();
+	WarpField(float confidenceThreshold);
 	~WarpField();
+
+    void init(const std::vector<Eigen::Vector4f>& first_frame);
+    void init(DynamicModel& dynamicModel);
+
+    void buildKDTree();
 
 private:
 	std::vector<deformation_node>* nodes_;
 	kd_tree_t* index_;
 	Eigen::Affine3f warp_to_live_;
+
+	float confidenceThreshold;
 };
 
 

@@ -317,7 +317,7 @@ class ElasticFusion
         void createCompute();
         void createFeedbackBuffers();
 
-        void createWarp();
+        void createWarp(float confidenceThreshold);
 
         void filterDepth();
         void metriciseDepth();
