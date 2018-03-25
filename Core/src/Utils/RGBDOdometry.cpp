@@ -115,6 +115,32 @@ RGBDOdometry::~RGBDOdometry()
 
 }
 
+void RGBDOdometry::fd2v(GPUTexture * filteredDepth, const float depthCutoff)
+{
+    cudaArray * textPtr;
+
+    cudaGraphicsMapResources(1, &filteredDepth->cudaRes);
+
+    cudaGraphicsSubResourceGetMappedArray(&textPtr, filteredDepth->cudaRes, 0, 0);
+
+    cudaMemcpy2DFromArray(depth_tmp[0].ptr(0), depth_tmp[0].step(), textPtr, 0, 0, depth_tmp[0].colsBytes(), depth_tmp[0].rows(), cudaMemcpyDeviceToDevice);
+
+    cudaGraphicsUnmapResources(1, &filteredDepth->cudaRes);
+
+    for(int i = 1; i < NUM_PYRS; ++i)
+    {
+        pyrDown(depth_tmp[i - 1], depth_tmp[i]);
+    }
+
+    for(int i = 0; i < NUM_PYRS; ++i)
+    {
+        createVMap(intr(i), depth_tmp[i], vmaps_curr_[i], depthCutoff);
+        createNMap(vmaps_curr_[i], nmaps_curr_[i]);
+    }
+
+    cudaDeviceSynchronize();
+}
+
 void RGBDOdometry::initICP(GPUTexture * filteredDepth, const float depthCutoff)
 {
     cudaArray * textPtr;
@@ -606,3 +632,46 @@ Eigen::MatrixXd RGBDOdometry::getCovariance()
 {
     return lastA.cast<double>().lu().inverse();
 }
+
+std::vector<Eigen::Vector4f> RGBDOdometry::getCurVertex(int points_num) {
+    // std::cout << "points_num: " << points_num << std::endl;
+    
+    float vmap_curr_host[height][width * 3];
+
+    std::vector<Eigen::Vector4f> live(height * width);
+
+    vmaps_curr_[0].download(&vmap_curr_host, vmaps_curr_[0].cols() * sizeof(float));
+
+    // for (int i = 0; i < width * 3; ++i)
+    // {
+    //     for (int j = 0; j < height; ++i)
+    //     {
+    //         std::cout << vmap_curr_host[j][i] << ", ";
+    //         std::cout << vmap_curr_host[j][i + 1] << ", ";
+    //         std::cout << vmap_curr_host[j][i + 2] << std::endl;
+    //     }
+    // }
+    
+
+
+   for (int i = 0; i < height; ++i)
+    {
+        for (int j = 0; j < width * 3; ++j)
+        {
+            int out = i * width + j / 3;
+            live[out][0] = vmap_curr_host[i][j];
+            live[out][1] = vmap_curr_host[i][j + 1];
+            live[out][2] = vmap_curr_host[i][j + 2];
+            live[out][3] = 0.0f;
+        }
+    }
+
+
+    return live;
+}
+
+
+
+
+
+

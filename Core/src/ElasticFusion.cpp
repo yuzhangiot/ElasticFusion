@@ -42,6 +42,12 @@ ElasticFusion::ElasticFusion(const int timeDelta,
                 Intrinsics::getInstance().cy(),
                 Intrinsics::getInstance().fx(),
                 Intrinsics::getInstance().fy()),
+   frameToModelDyn(Resolution::getInstance().width(),
+                Resolution::getInstance().height(),
+                Intrinsics::getInstance().cx(),
+                Intrinsics::getInstance().cy(),
+                Intrinsics::getInstance().fx(),
+                Intrinsics::getInstance().fy()),
    modelToModel(Resolution::getInstance().width(),
                 Resolution::getInstance().height(),
                 Intrinsics::getInstance().cx(),
@@ -310,6 +316,8 @@ void ElasticFusion::processFrame(const unsigned char * rgb,
 
         // copy rgb to lastNextImage[0] then a 3 level pyramid
         frameToModel.initFirstRGB(textures[GPUTexture::RGB]);
+
+        frameToModelDyn.initFirstRGB(textures[GPUTexture::RGB]);
 
         // input: globalModels's vbos
         // output: warp's nodes_ and buildKDTree
@@ -766,6 +774,20 @@ void ElasticFusion::dynamicFusion() {
     canonical[i] = currPose.inverse() * pos;
     // }
   }
+                             
+  //2.copy current frame's point cloud
+
+  // input is texture depth filtered, generate current vertex and normal
+  // vertex: px / (x - cx) = z / fx, py / (y - cy) = z / fy, pz = z : vmaps_curr_
+  // normal: cross multi vec[(x,y), (x+1, y)] and vec[(x,y), (x, y+1)], then normalize : nmaps_curr_
+  frameToModelDyn.fd2v(textures[GPUTexture::DEPTH_FILTERED], maxDepthProcessed);
+
+  // convert vertex to curDepth, convert rgb to intense map : destImages
+  frameToModelDyn.initRGB(textures[GPUTexture::RGB]);
+
+  // download from vmaps_curr_ to live
+  std::vector<Eigen::Vector4f> live = frameToModelDyn.getCurVertex(points_num);
+
 }
 
 void ElasticFusion::processFerns()

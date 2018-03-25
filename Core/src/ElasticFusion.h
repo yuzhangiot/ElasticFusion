@@ -300,6 +300,7 @@ class ElasticFusion
         IndexMap indexMapDyn;
         RGBDOdometry frameToModel;
         RGBDOdometry modelToModel;
+        RGBDOdometry frameToModelDyn;
         GlobalModel globalModel;
         DynamicModel dynamicModel;
         FillIn fillIn;

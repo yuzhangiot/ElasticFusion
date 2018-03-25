@@ -40,6 +40,8 @@ class RGBDOdometry
 
         virtual ~RGBDOdometry();
 
+        void fd2v(GPUTexture * filteredDepth, const float depthCutoff);
+
         void initICP(GPUTexture * filteredDepth, const float depthCutoff);
 
         void initICP(GPUTexture * predictedVertices, GPUTexture * predictedNormals, const float depthCutoff);
@@ -61,6 +63,8 @@ class RGBDOdometry
                                           const bool & so3);
 
         Eigen::MatrixXd getCovariance();
+
+        std::vector<Eigen::Vector4f> getCurVertex(int);
 
         float lastICPError;
         float lastICPCount;
