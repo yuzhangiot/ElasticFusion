@@ -29,6 +29,14 @@ public:
     void init(const std::vector<Eigen::Vector4f>& first_frame);
     void init(DynamicModel& dynamicModel);
 
+    void warp(std::vector<Eigen::Vector4f>& points, std::vector<Eigen::Vector3f>& normals) const;
+
+    utils::DualQuaternion<float> DQB(const Eigen::Vector4f& vertex) const;
+
+    void getWeightsAndUpdateKNN(const Eigen::Vector4f& vertex, float weights[KNN_NEIGHBOURS]) const;
+
+    void KNN(Eigen::Vector4f point) const;
+
     void buildKDTree();
 
 private:

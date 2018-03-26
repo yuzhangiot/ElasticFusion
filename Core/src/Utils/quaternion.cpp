@@ -1,5 +1,6 @@
 #include "quaternion.h"
 
+using namespace utils;
 
 // template<typename T>
 // Quaternion<T>::Quaternion():
