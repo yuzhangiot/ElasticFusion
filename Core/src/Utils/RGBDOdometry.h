@@ -42,6 +42,8 @@ class RGBDOdometry
 
         void fd2v(GPUTexture * filteredDepth, const float depthCutoff);
 
+        void pv2v(GPUTexture * predictedVertices, GPUTexture * predictedNormals, const float depthCutoff, const Eigen::Matrix4f & modelPose);
+
         void initICP(GPUTexture * filteredDepth, const float depthCutoff);
 
         void initICP(GPUTexture * predictedVertices, GPUTexture * predictedNormals, const float depthCutoff);
@@ -64,7 +66,9 @@ class RGBDOdometry
 
         Eigen::MatrixXd getCovariance();
 
-        std::vector<Eigen::Vector4f> getCurVertex(int);
+        std::vector<Eigen::Vector4f> getCurVertex();
+
+        std::vector<Eigen::Vector4f> getPreVertex();
 
         std::vector<Eigen::Vector3f> getCurNormal();
 

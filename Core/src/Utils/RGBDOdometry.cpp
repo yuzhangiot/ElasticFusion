@@ -141,6 +141,45 @@ void RGBDOdometry::fd2v(GPUTexture * filteredDepth, const float depthCutoff)
     cudaDeviceSynchronize();
 }
 
+void RGBDOdometry::pv2v(GPUTexture * predictedVertices,
+                                GPUTexture * predictedNormals,
+                                const float depthCutoff,
+                                const Eigen::Matrix4f & modelPose)
+{
+    cudaArray * textPtr;
+
+    cudaGraphicsMapResources(1, &predictedVertices->cudaRes);
+    cudaGraphicsSubResourceGetMappedArray(&textPtr, predictedVertices->cudaRes, 0, 0);
+    cudaMemcpyFromArray(vmaps_tmp.ptr(), textPtr, 0, 0, vmaps_tmp.sizeBytes(), cudaMemcpyDeviceToDevice);
+    cudaGraphicsUnmapResources(1, &predictedVertices->cudaRes);
+
+    cudaGraphicsMapResources(1, &predictedNormals->cudaRes);
+    cudaGraphicsSubResourceGetMappedArray(&textPtr, predictedNormals->cudaRes, 0, 0);
+    cudaMemcpyFromArray(nmaps_tmp.ptr(), textPtr, 0, 0, nmaps_tmp.sizeBytes(), cudaMemcpyDeviceToDevice);
+    cudaGraphicsUnmapResources(1, &predictedNormals->cudaRes);
+
+    copyMaps(vmaps_tmp, nmaps_tmp, vmaps_g_prev_[0], nmaps_g_prev_[0]);
+
+    for(int i = 1; i < NUM_PYRS; ++i)
+    {
+        resizeVMap(vmaps_g_prev_[i - 1], vmaps_g_prev_[i]);
+        resizeNMap(nmaps_g_prev_[i - 1], nmaps_g_prev_[i]);
+    }
+
+    Eigen::Matrix<float, 3, 3, Eigen::RowMajor> Rcam = modelPose.topLeftCorner(3, 3);
+    Eigen::Vector3f tcam = modelPose.topRightCorner(3, 1);
+
+    mat33 device_Rcam = Rcam;
+    float3 device_tcam = *reinterpret_cast<float3*>(tcam.data());
+
+    for(int i = 0; i < NUM_PYRS; ++i)
+    {
+        tranformMaps(vmaps_g_prev_[i], nmaps_g_prev_[i], device_Rcam, device_tcam, vmaps_g_prev_[i], nmaps_g_prev_[i]);
+    }
+
+    cudaDeviceSynchronize();
+}
+
 void RGBDOdometry::initICP(GPUTexture * filteredDepth, const float depthCutoff)
 {
     cudaArray * textPtr;
@@ -633,8 +672,7 @@ Eigen::MatrixXd RGBDOdometry::getCovariance()
     return lastA.cast<double>().lu().inverse();
 }
 
-std::vector<Eigen::Vector4f> RGBDOdometry::getCurVertex(int points_num) {
-    // std::cout << "points_num: " << points_num << std::endl;
+std::vector<Eigen::Vector4f> RGBDOdometry::getCurVertex() {
     
     float vmap_curr_host[height][width * 3];
 
@@ -657,6 +695,32 @@ std::vector<Eigen::Vector4f> RGBDOdometry::getCurVertex(int points_num) {
 
 
     return live;
+}
+
+std::vector<Eigen::Vector4f> RGBDOdometry::getPreVertex() {
+    // std::cout << "points_num: " << points_num << std::endl;
+    
+    float vmap_pre_host[height][width * 3];
+
+    std::vector<Eigen::Vector4f> predicted(height * width);
+
+    vmaps_g_prev_[0].download(&vmap_pre_host, vmaps_g_prev_[0].cols() * sizeof(float));
+    
+
+   for (int i = 0; i < height; ++i)
+    {
+        for (int j = 0; j < width * 3; ++j)
+        {
+            int out = i * width + j / 3;
+            predicted[out][0] = vmap_pre_host[i][j];
+            predicted[out][1] = vmap_pre_host[i][j + 1];
+            predicted[out][2] = vmap_pre_host[i][j + 2];
+            predicted[out][3] = 0.0f;
+        }
+    }
+
+
+    return predicted;
 }
 
 std::vector<Eigen::Vector3f> RGBDOdometry::getCurNormal() {

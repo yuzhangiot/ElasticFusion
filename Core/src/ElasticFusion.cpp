@@ -762,18 +762,12 @@ void ElasticFusion::processFrame(const unsigned char * rgb,
 
 void ElasticFusion::dynamicFusion() {
   //1.copy point clouds from dynamicModels to canonical
-  auto points_num = dynamicModel.lastCount();
-  std::vector<Eigen::Vector4f> canonical(points_num);
-  Eigen::Vector4f * mapData = dynamicModel.downloadMap();
+  frameToModelDyn.pv2v(indexMapDyn.vertexTex(), indexMapDyn.normalTex(), maxDepthProcessed, currPose);
 
-  for (int i = 0; i < points_num; ++i) {
-    Eigen::Vector4f pos = mapData[(i * 3) + 0];
+  frameToModelDyn.initRGBModel(indexMapDyn.imageTex());
 
-    // if(pos[3] > confidenceThreshold) {
-    //get current view port's point cloud
-    canonical[i] = currPose.inverse() * pos;
-    // }
-  }
+  std::vector<Eigen::Vector4f> canonical = frameToModelDyn.getPreVertex();
+
                              
   //2 copy current frame's point cloud and normal
 
@@ -786,10 +780,15 @@ void ElasticFusion::dynamicFusion() {
   frameToModelDyn.initRGB(textures[GPUTexture::RGB]);
 
   // download from vmaps_curr_ to live
-  std::vector<Eigen::Vector4f> live = frameToModelDyn.getCurVertex(points_num);
+  std::vector<Eigen::Vector4f> live = frameToModelDyn.getCurVertex();
 
-  // download from nmaps_curr_ to liveNormal
-  std::vector<Eigen::Vector3f> liveNormal = frameToModelDyn.getCurNormal();
+  // download from nmaps_curr_ to canonical_normals
+  std::vector<Eigen::Vector3f> canonical_normals = frameToModelDyn.getCurNormal();
+
+  //3 do the warping
+  std::vector<Eigen::Vector4f> canonical_visible(canonical);
+
+  // warp_->warp(canonical, canonical_normals);
 
 }
 
