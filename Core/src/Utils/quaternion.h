@@ -16,6 +16,99 @@ namespace utils{
 		// Quaternion(const Eigen::Vector3f& normal);
 		~Quaternion(){};
 
+		T norm()
+        {
+            return sqrt((w_ * w_) + (x_ * x_) + (y_ * y_) + (z_ * z_));
+        }
+		void normalize()
+        {
+            // should never happen unless the Quaternion<T> wasn't initialized
+            // correctly.
+            assert( !((w_ == 0) && (x_ == 0) && (y_ == 0) && (z_ == 0)));
+            T theNorm = norm();
+            assert(theNorm > 0);
+            (*this) = (1.0/theNorm) * (*this);
+        }
+
+
+		void encodeRotation(T theta, T x, T y, T z)
+        {
+            auto sin_half = sin(theta / 2);
+            w_ = cos(theta / 2);
+            x_ = x * sin_half;
+            y_ = y * sin_half;
+            z_ = z * sin_half;
+            normalize();
+        }
+
+        void getRodrigues(T& x, T& y, T& z)
+        {
+            if(w_ == 1)
+            {
+                x = y = z = 0;
+                return;
+            }
+            T half_theta = acos(w_);
+            T k = sin(half_theta) * tan(half_theta);
+            x = x_ / k;
+            y = y_ / k;
+            z = z_ / k;
+        }
+
+        Quaternion conjugate() const
+        {
+            return Quaternion<T>(w_, -x_, -y_, -z_);
+        }
+
+        void rotate(T& x, T& y, T& z)
+        {
+            Quaternion<T> q = (*this);
+            Quaternion<T> qStar = (*this).conjugate();
+            Quaternion<T> rotatedVal = q * Quaternion(0, x, y, z) * qStar;
+
+            x = rotatedVal.x_;
+            y = rotatedVal.y_;
+            z = rotatedVal.z_;
+        }
+
+        void rotate(Eigen::Vector3f& v) const
+        {
+            auto rot= *this;
+            rot.normalize();
+            Eigen::Vector3f q_vec(rot.x_, rot.y_, rot.z_);
+            v += (q_vec*2.f).cross( q_vec.cross(v) + v*rot.w_ );
+        }
+
+        Quaternion operator+(const Quaternion& other)
+        {
+            return Quaternion(  (w_ + other.w_),
+                                (x_ + other.x_),
+                                (y_ + other.y_),
+                                (z_ + other.z_));
+        }
+        void operator+=(const Quaternion& other)
+        {
+            *this = *this + other;
+        }
+
+        Quaternion operator-(const Quaternion& other)
+        {
+            return Quaternion((w_ - other.w_),
+                              (x_ - other.x_),
+                              (y_ - other.y_),
+                              (z_ - other.z_));
+        }
+
+        Quaternion operator-()
+        {
+            return Quaternion(-w_, -x_, -y_, -z_);
+        }
+
+        bool operator==(const Quaternion& other) const
+        {
+            return (w_ == other.w_) && (x_ == other.x_) && (y_ == other.y_) && (z_ == other.z_);
+        }
+
 
 	private:
 		T w_;
