@@ -172,10 +172,16 @@ ElasticFusion::~ElasticFusion()
     {
       delete warp_;
     }
+
+    if(optimiser_)
+    {
+      delete optimiser_;
+    }
 }
 
 void ElasticFusion::createWarp(float confidenceThreshold) {
   warp_ = new WarpField(confidenceThreshold);
+  optimiser_ = new WarpFieldOptimizer();
 }
 
 void ElasticFusion::createTextures()

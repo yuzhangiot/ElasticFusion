@@ -35,6 +35,7 @@
 #include "PoseMatch.h"
 #include "Defines.h"
 #include "WarpField.h"
+#include "WarpFieldOptimizer.h"
 
 #include <iomanip>
 #include <pangolin/gl/glcuda.h>
@@ -377,6 +378,7 @@ class ElasticFusion
 
         // dynamic related variables
         WarpField* warp_;
+        WarpFieldOptimizer* optimiser_;
 };
 
 #endif /* ELASTICFUSION_H_ */

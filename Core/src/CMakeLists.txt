@@ -9,14 +9,15 @@ find_package(CUDA REQUIRED)
 find_package(SuiteSparse REQUIRED)
 
 set(efusion_SHADER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Shaders" CACHE PATH "Where the shaders live")
-set(OPT_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/../deps/Opt/examples/external/mLib/include ${CMAKE_CURRENT_SOURCE_DIR}/deps/Opt/examples/shared/ ${CMAKE_CURRENT_SOURCE_DIR}/../deps/Opt/API/release/include)
-set(OPT_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/../deps/Opt/API/release/lib/libOptDev.a)
-set(TERRA_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/../deps/terra/lib/libterra.a)
+set(OPT_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/../../deps/Opt/examples/external/mLib/include ${CMAKE_CURRENT_SOURCE_DIR}/../../deps/Opt/examples/shared/ ${CMAKE_CURRENT_SOURCE_DIR}/../../deps/Opt/API/release/include)
+set(OPT_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/../../deps/Opt/API/release/lib/libOptDev.a)
+set(TERRA_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/../../deps/terra/lib/libterra.a)
 
 include_directories(${Pangolin_INCLUDE_DIRS})
 include_directories(${CUDA_INCLUDE_DIRS})
 include_directories(${EIGEN_INCLUDE_DIRS})
 include_directories(${SUITESPARSE_INCLUDE_DIRS})
+include_directories(${OPT_INCLUDE_DIRS})
 
 file(GLOB srcs *.cpp)
 file(GLOB utils_srcs Utils/*.cpp)
@@ -82,7 +83,9 @@ target_link_libraries(efusion
                       ${Pangolin_LIBRARIES}
                       ${CUDA_LIBRARIES}
                       ${SUITESPARSE_LIBRARIES}
-					  ${EXTRA_WINDOWS_LIBS}
+					            ${EXTRA_WINDOWS_LIBS}
+                      ${OPT_LIBRARIES}
+                      ${TERRA_LIBRARIES}
 )
 
 INSTALL(TARGETS efusion
