@@ -24,7 +24,7 @@ namespace utils {
         DualQuaternion(utils::Quaternion<T> translation, Quaternion<T> rotation)
         {
             rotation_ = rotation;
-            // translation_ = 0.5 * translation * rotation;
+            translation_ = 0.5 * translation * rotation;
         }
 
 

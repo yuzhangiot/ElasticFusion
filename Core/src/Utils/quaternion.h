@@ -109,6 +109,41 @@ namespace utils{
             return (w_ == other.w_) && (x_ == other.x_) && (y_ == other.y_) && (z_ == other.z_);
         }
 
+        template <typename U> friend Quaternion operator*(const U scalar, const Quaternion& other)
+        {
+            return Quaternion<T>((scalar * other.w_),
+                                 (scalar * other.x_),
+                                 (scalar * other.y_),
+                                 (scalar * other.z_));
+        }
+
+        template <typename U> friend Quaternion operator/(const Quaternion& q, const U scalar)
+        {
+            return (1 / scalar) * q;
+        }
+
+        /// Quaternion Product
+        Quaternion operator*(const Quaternion& other)
+        {
+            return Quaternion(
+                    ((w_*other.w_) - (x_*other.x_) - (y_*other.y_) - (z_*other.z_)),
+                    ((w_*other.x_) + (x_*other.w_) + (y_*other.z_) - (z_*other.y_)),
+                    ((w_*other.y_) - (x_*other.z_) + (y_*other.w_) + (z_*other.x_)),
+                    ((w_*other.z_) + (x_*other.y_) - (y_*other.x_) + (z_*other.w_))
+            );
+        }
+
+        T dotProduct(Quaternion other)
+        {
+            return 0.5 * ((conjugate() * other) + (*this) * other.conjugate()).w_;
+        }
+
+        template <typename U> friend std::ostream& operator << (std::ostream& os, const Quaternion<U>& q)
+        {
+            os << "(" << q.w_ << ", " << q.x_ << ", " <<  q.y_ << ", " << q.z_ << ")";
+            return os;
+        }
+
 
 	private:
 		T w_;
