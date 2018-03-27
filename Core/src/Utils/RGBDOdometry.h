@@ -66,9 +66,9 @@ class RGBDOdometry
 
         Eigen::MatrixXd getCovariance();
 
-        std::vector<Eigen::Vector4f> getCurVertex();
+        std::vector<Eigen::Vector3f> getCurVertex();
 
-        std::vector<Eigen::Vector4f> getPreVertex();
+        std::vector<Eigen::Vector3f> getPreVertex();
 
         std::vector<Eigen::Vector3f> getCurNormal();
 

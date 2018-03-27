@@ -781,7 +781,7 @@ void ElasticFusion::dynamicFusion() {
 
   frameToModelDyn.initRGBModel(indexMapDyn.imageTex());
 
-  std::vector<Eigen::Vector4f> canonical = frameToModelDyn.getPreVertex();
+  std::vector<Eigen::Vector3f> canonical = frameToModelDyn.getPreVertex();
 
                              
   //2 copy current frame's point cloud and normal
@@ -795,15 +795,17 @@ void ElasticFusion::dynamicFusion() {
   frameToModelDyn.initRGB(textures[GPUTexture::RGB]);
 
   // download from vmaps_curr_ to live
-  std::vector<Eigen::Vector4f> live = frameToModelDyn.getCurVertex();
+  std::vector<Eigen::Vector3f> live = frameToModelDyn.getCurVertex();
 
   // download from nmaps_curr_ to canonical_normals
   std::vector<Eigen::Vector3f> canonical_normals = frameToModelDyn.getCurNormal();
 
   //3 do the warping
-  std::vector<Eigen::Vector4f> canonical_visible(canonical);
+  std::vector<Eigen::Vector3f> canonical_visible(canonical);
 
-  std::vector<Eigen::Vector4f> new_canonical = warp_->warp(canonical, canonical_normals);
+  warp_->warp(canonical, canonical_normals);
+
+  // optimiser_->optimiseWarpData(canonical, canonical_normals, live, canonical_normals);
 
 }
 

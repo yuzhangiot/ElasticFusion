@@ -672,11 +672,11 @@ Eigen::MatrixXd RGBDOdometry::getCovariance()
     return lastA.cast<double>().lu().inverse();
 }
 
-std::vector<Eigen::Vector4f> RGBDOdometry::getCurVertex() {
+std::vector<Eigen::Vector3f> RGBDOdometry::getCurVertex() {
     
     float vmap_curr_host[height][width * 3];
 
-    std::vector<Eigen::Vector4f> live(height * width);
+    std::vector<Eigen::Vector3f> live(height * width);
 
     vmaps_curr_[0].download(&vmap_curr_host, vmaps_curr_[0].cols() * sizeof(float));
     
@@ -689,7 +689,6 @@ std::vector<Eigen::Vector4f> RGBDOdometry::getCurVertex() {
             live[out][0] = vmap_curr_host[i][j];
             live[out][1] = vmap_curr_host[i][j + 1];
             live[out][2] = vmap_curr_host[i][j + 2];
-            live[out][3] = 0.0f;
         }
     }
 
@@ -697,12 +696,12 @@ std::vector<Eigen::Vector4f> RGBDOdometry::getCurVertex() {
     return live;
 }
 
-std::vector<Eigen::Vector4f> RGBDOdometry::getPreVertex() {
+std::vector<Eigen::Vector3f> RGBDOdometry::getPreVertex() {
     // std::cout << "points_num: " << points_num << std::endl;
     
     float vmap_pre_host[height][width * 3];
 
-    std::vector<Eigen::Vector4f> predicted(height * width);
+    std::vector<Eigen::Vector3f> predicted(height * width);
 
     vmaps_g_prev_[0].download(&vmap_pre_host, vmaps_g_prev_[0].cols() * sizeof(float));
     
@@ -715,7 +714,6 @@ std::vector<Eigen::Vector4f> RGBDOdometry::getPreVertex() {
             predicted[out][0] = vmap_pre_host[i][j];
             predicted[out][1] = vmap_pre_host[i][j + 1];
             predicted[out][2] = vmap_pre_host[i][j + 2];
-            predicted[out][3] = 0.0f;
         }
     }
 

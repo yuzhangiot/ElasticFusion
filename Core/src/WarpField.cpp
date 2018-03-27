@@ -75,6 +75,7 @@ void WarpField::buildKDTree()
 
 void WarpField::KNN(Eigen::Vector3f point) const
 {
+	//TODO : check if point's memory has been changed
     resultSet_->init(&ret_index_[0], &out_dist_sqr_[0]);
     float tmp[3];
     tmp[0] = point[0];
@@ -111,23 +112,22 @@ utils::DualQuaternion<float> WarpField::DQB(const Eigen::Vector3f& vertex) const
     return res;
 }
 
-std::vector<Eigen::Vector4f> WarpField::warp(std::vector<Eigen::Vector4f>& points, std::vector<Eigen::Vector3f>& normals) const
+void WarpField::warp(std::vector<Eigen::Vector3f>& points, std::vector<Eigen::Vector3f>& normals) const
 {
     int i = 0;
-    std::vector<Eigen::Vector4f> newPoints;
     for (auto& point : points)
     {
         if(std::isnan(point[0]) || std::isnan(normals[i][0]))
             continue;
-        utils::DualQuaternion<float> dqb = DQB(point.head<3>());
-        Eigen::Vector3f newPoint = dqb.transform(point.head<3>());
-        newPoint = warp_to_live_ * newPoint;
+        utils::DualQuaternion<float> dqb = DQB(point);
+        dqb.transform(point);
+        point = warp_to_live_ * point;
 
         dqb.transform(normals[i]);
         normals[i] = warp_to_live_ * normals[i];
         i++;
+
     }
-    return newPoints;
 }
 
 const std::vector<deformation_node>* WarpField::getNodes() const

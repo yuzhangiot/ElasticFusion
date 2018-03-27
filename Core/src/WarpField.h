@@ -30,7 +30,7 @@ public:
     void init(const std::vector<Eigen::Vector4f>& first_frame);
     void init(DynamicModel& dynamicModel);
 
-    std::vector<Eigen::Vector4f> warp(std::vector<Eigen::Vector4f>& points, std::vector<Eigen::Vector3f>& normals) const;
+    void warp(std::vector<Eigen::Vector3f>& points, std::vector<Eigen::Vector3f>& normals) const;
 
     utils::DualQuaternion<float> DQB(const Eigen::Vector3f& vertex) const;
 
