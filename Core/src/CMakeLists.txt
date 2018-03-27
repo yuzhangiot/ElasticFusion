@@ -23,6 +23,7 @@ file(GLOB utils_srcs Utils/*.cpp)
 file(GLOB shader_srcs Shaders/*.cpp)
 file(GLOB cuda Cuda/*.cu)
 file(GLOB containers Cuda/containers/*.cpp)
+file(GLOB opts_srcs Opts/*.cpp)
 
 if(WIN32)
   file(GLOB hdrs *.h)
@@ -30,6 +31,7 @@ if(WIN32)
   file(GLOB shader_hdrs Shaders/*.h)
   file(GLOB cuda_hdrs Cuda/*.cuh)
   file(GLOB containers_hdrs Cuda/containers/*.hpp)
+  file(GLOB opts_hdrs Opts/*.h)
 endif()
 
 set(CUDA_ARCH_BIN "30 35 50 52 61" CACHE STRING "Specify 'real' GPU arch to build binaries for, BIN(PTX) format is supported. Example: 1.3 2.1(1.3) or 13 21(13)")
@@ -63,12 +65,14 @@ add_library(efusion SHARED
             ${srcs}
             ${utils_srcs}
             ${shader_srcs}
+            ${opts_srcs}
             ${cuda} 
             ${cuda_objs} 
             ${containers}
             ${hdrs}
             ${utils_hdrs}
             ${shader_hdrs}
+            ${opts_hdrs}
             ${cuda_hdrs} 
             ${containers_hdrs}
 )
