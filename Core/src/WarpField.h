@@ -32,15 +32,20 @@ public:
 
     std::vector<Eigen::Vector4f> warp(std::vector<Eigen::Vector4f>& points, std::vector<Eigen::Vector3f>& normals) const;
 
-    utils::DualQuaternion<float> DQB(const Eigen::Vector4f& vertex) const;
+    utils::DualQuaternion<float> DQB(const Eigen::Vector3f& vertex) const;
 
-    void getWeightsAndUpdateKNN(const Eigen::Vector4f& vertex, float weights[KNN_NEIGHBOURS]) const;
+    void getWeightsAndUpdateKNN(const Eigen::Vector3f& vertex, float weights[KNN_NEIGHBOURS]) const;
 
-    void KNN(Eigen::Vector4f point) const;
+    void KNN(Eigen::Vector3f point) const;
 
     void buildKDTree();
 
     float weighting(float squared_dist, float weight) const;
+
+    const std::vector<deformation_node>* getNodes() const;
+          std::vector<deformation_node>* getNodes();
+
+    std::vector<size_t>* getRetIndex() const;
 
 private:
 	std::vector<deformation_node>* nodes_;

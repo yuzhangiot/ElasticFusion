@@ -73,7 +73,7 @@ void WarpField::buildKDTree()
     index_->buildIndex();
 }
 
-void WarpField::KNN(Eigen::Vector4f point) const
+void WarpField::KNN(Eigen::Vector3f point) const
 {
     resultSet_->init(&ret_index_[0], &out_dist_sqr_[0]);
     float tmp[3];
@@ -88,14 +88,14 @@ float WarpField::weighting(float squared_dist, float weight) const
     return (float) exp(-squared_dist / (2 * weight * weight));
 }
 
-void WarpField::getWeightsAndUpdateKNN(const Eigen::Vector4f& vertex, float weights[KNN_NEIGHBOURS]) const
+void WarpField::getWeightsAndUpdateKNN(const Eigen::Vector3f& vertex, float weights[KNN_NEIGHBOURS]) const
 {
     KNN(vertex);
     for (size_t i = 0; i < KNN_NEIGHBOURS; i++)
         weights[i] = weighting(out_dist_sqr_[i], nodes_->at(ret_index_[i]).weight);
 }
 
-utils::DualQuaternion<float> WarpField::DQB(const Eigen::Vector4f& vertex) const
+utils::DualQuaternion<float> WarpField::DQB(const Eigen::Vector3f& vertex) const
 {
     float weights[KNN_NEIGHBOURS];
     getWeightsAndUpdateKNN(vertex, weights);
@@ -119,7 +119,7 @@ std::vector<Eigen::Vector4f> WarpField::warp(std::vector<Eigen::Vector4f>& point
     {
         if(std::isnan(point[0]) || std::isnan(normals[i][0]))
             continue;
-        utils::DualQuaternion<float> dqb = DQB(point);
+        utils::DualQuaternion<float> dqb = DQB(point.head<3>());
         Eigen::Vector3f newPoint = dqb.transform(point.head<3>());
         newPoint = warp_to_live_ * newPoint;
 
@@ -130,6 +130,24 @@ std::vector<Eigen::Vector4f> WarpField::warp(std::vector<Eigen::Vector4f>& point
     return newPoints;
 }
 
+const std::vector<deformation_node>* WarpField::getNodes() const
+{
+    return nodes_;
+}
+
+/**
+ * \brief
+ * \return
+ */
+std::vector<deformation_node>* WarpField::getNodes()
+{
+    return nodes_;
+}
+
+std::vector<size_t>* WarpField::getRetIndex() const
+{
+    return &ret_index_;
+}
 
 
 

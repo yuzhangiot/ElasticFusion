@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 2.6.0)
 project(ElasticFusion)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}")
+set(OPT_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/../../deps/Opt/examples/external/mLib/include ${CMAKE_CURRENT_SOURCE_DIR}/../../deps/Opt/examples/shared/ ${CMAKE_CURRENT_SOURCE_DIR}/../../deps/Opt/API/release/include)
+set(OPT_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/../../deps/Opt/API/release/lib/libOptDev.a)
+set(TERRA_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/../../deps/terra/lib/libterra.a)
 
 if(WIN32)
   macro(CANONIFY_BOOL var)
@@ -44,6 +47,7 @@ include_directories(${Pangolin_INCLUDE_DIRS})
 include_directories(${CUDA_INCLUDE_DIRS})
 include_directories(${EFUSION_INCLUDE_DIR})
 include_directories(${OPENNI2_INCLUDE_DIR})
+include_directories(${OPT_INCLUDE_DIRS})
 
 if(WITH_REALSENSE)
   include_directories(${REALSENSE_INCLUDE_DIR})
@@ -90,6 +94,8 @@ target_link_libraries(ElasticFusion
                       ${SUITESPARSE_LIBRARIES}
                       ${BLAS_LIBRARIES}
                       ${LAPACK_LIBRARIES}
+                      ${OPT_LIBRARIES}
+                      ${TERRA_LIBRARIES}
 )
 
 
@@ -98,3 +104,5 @@ INSTALL(TARGETS ElasticFusion
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
 )
+
+target_compile_definitions(ElasticFusion PUBLIC SOLVER_PATH=${CMAKE_CURRENT_SOURCE_DIR}/Solvers/)
