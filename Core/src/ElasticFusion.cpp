@@ -788,7 +788,7 @@ void ElasticFusion::dynamicFusion() {
   //3 do the warping
   std::vector<Eigen::Vector4f> canonical_visible(canonical);
 
-  warp_->warp(canonical, canonical_normals);
+  std::vector<Eigen::Vector4f> new_canonical = warp_->warp(canonical, canonical_normals);
 
 }
 

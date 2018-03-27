@@ -144,8 +144,6 @@ namespace utils{
             return os;
         }
 
-
-	private:
 		T w_;
 		T x_;
 		T y_;

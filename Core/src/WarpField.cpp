@@ -38,7 +38,8 @@ void WarpField::init(const std::vector<Eigen::Vector4f>& first_frame)
         if (!std::isnan(point[0]))
         {
             nodes_->at(i).transform = utils::DualQuaternion<float>();
-            nodes_->at(i).vertex = point;
+            nodes_->at(i).vertex = point.head<3>();
+            nodes_->at(i).weight = point[3];
         }
     }
     buildKDTree();
@@ -56,7 +57,8 @@ void WarpField::init(DynamicModel& dynamicModel) {
 
         // if(pos[3] > confidenceThreshold) {
         	nodes_->at(i).transform = utils::DualQuaternion<float>();
-            nodes_->at(i).vertex = pos;
+            nodes_->at(i).vertex = pos.head<3>();
+            nodes_->at(i).weight = pos[3];
         // }
 	}
 	buildKDTree();
@@ -64,7 +66,7 @@ void WarpField::init(DynamicModel& dynamicModel) {
 
 void WarpField::buildKDTree()
 {
-    //    Build kd-tree with current warp nodes.
+    //Build kd-tree with current warp nodes.
     cloud.pts.resize(nodes_->size());
     for(size_t i = 0; i < nodes_->size(); i++)
         cloud.pts[i] = nodes_->at(i).vertex;
@@ -74,14 +76,23 @@ void WarpField::buildKDTree()
 void WarpField::KNN(Eigen::Vector4f point) const
 {
     resultSet_->init(&ret_index_[0], &out_dist_sqr_[0]);
-    // index_->findNeighbors(*resultSet_, point.val, nanoflann::SearchParams(10));
+    float tmp[3];
+    tmp[0] = point[0];
+    tmp[1] = point[1];
+    tmp[2] = point[2];
+    index_->findNeighbors(*resultSet_, tmp, nanoflann::SearchParams(10));
+}
+
+float WarpField::weighting(float squared_dist, float weight) const
+{
+    return (float) exp(-squared_dist / (2 * weight * weight));
 }
 
 void WarpField::getWeightsAndUpdateKNN(const Eigen::Vector4f& vertex, float weights[KNN_NEIGHBOURS]) const
 {
     KNN(vertex);
-    // for (size_t i = 0; i < KNN_NEIGHBOURS; i++)
-    //     weights[i] = weighting(out_dist_sqr_[i], nodes_->at(ret_index_[i]).weight);
+    for (size_t i = 0; i < KNN_NEIGHBOURS; i++)
+        weights[i] = weighting(out_dist_sqr_[i], nodes_->at(ret_index_[i]).weight);
 }
 
 utils::DualQuaternion<float> WarpField::DQB(const Eigen::Vector4f& vertex) const
@@ -90,31 +101,33 @@ utils::DualQuaternion<float> WarpField::DQB(const Eigen::Vector4f& vertex) const
     getWeightsAndUpdateKNN(vertex, weights);
     utils::Quaternion<float> translation_sum(0,0,0,0);
     utils::Quaternion<float> rotation_sum(0,0,0,0);
-    // for (size_t i = 0; i < KNN_NEIGHBOURS; i++)
-    // {
-    //     translation_sum += weights[i] * nodes_->at(ret_index_[i]).transform.getTranslation();
-    //     rotation_sum += weights[i] * nodes_->at(ret_index_[i]).transform.getRotation();
-    // }
-    // rotation_sum.normalize();
+    for (size_t i = 0; i < KNN_NEIGHBOURS; i++)
+    {
+        translation_sum += weights[i] * nodes_->at(ret_index_[i]).transform.getTranslation();
+        rotation_sum += weights[i] * nodes_->at(ret_index_[i]).transform.getRotation();
+    }
+    rotation_sum.normalize();
     auto res = utils::DualQuaternion<float>(translation_sum, rotation_sum);
     return res;
 }
 
-void WarpField::warp(std::vector<Eigen::Vector4f>& points, std::vector<Eigen::Vector3f>& normals) const
+std::vector<Eigen::Vector4f> WarpField::warp(std::vector<Eigen::Vector4f>& points, std::vector<Eigen::Vector3f>& normals) const
 {
     int i = 0;
+    std::vector<Eigen::Vector4f> newPoints;
     for (auto& point : points)
     {
         if(std::isnan(point[0]) || std::isnan(normals[i][0]))
             continue;
         utils::DualQuaternion<float> dqb = DQB(point);
-        // dqb.transform(point);
-        // point = warp_to_live_ * point;
+        Eigen::Vector3f newPoint = dqb.transform(point.head<3>());
+        newPoint = warp_to_live_ * newPoint;
 
-        // dqb.transform(normals[i]);
-        // normals[i] = warp_to_live_ * normals[i];
-        // i++;
+        dqb.transform(normals[i]);
+        normals[i] = warp_to_live_ * normals[i];
+        i++;
     }
+    return newPoints;
 }
 
 

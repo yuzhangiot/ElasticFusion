@@ -154,6 +154,67 @@ namespace utils {
             return result;
         }
 
+        /// (left) Scalar Multiplication
+        /**
+         * \fn template <typename U> friend Quaternion operator*(const U scalar,
+         * \brief implements scalar multiplication for arbitrary scalar types
+         */
+        template<typename U>
+        friend DualQuaternion operator*(const U scalar, const DualQuaternion &q)
+        {
+            DualQuaternion<T> result;
+            result.rotation_ = scalar * q.rotation_;
+            result.translation_ = scalar * q.translation_;
+            return result;
+        }
+
+        DualQuaternion conjugate()
+        {
+            DualQuaternion<T> result;
+            result.rotation_ = rotation_.conjugate();
+            result.translation_ = translation_.conjugate();
+            return result;
+        }
+
+        inline DualQuaternion identity()
+        {
+            return DualQuaternion(Quaternion<T>(0, 0, 0, 0),Quaternion<T>(0, 1, 0, 0));
+        }
+
+        Eigen::Vector3f transform(Eigen::Vector3f point) // TODO: this should be a lot more generic
+        {
+            Eigen::Vector3f translation;
+            getTranslation(translation);
+            rotation_.rotate(point);
+            point += translation;
+            return point;
+        }
+
+        void from_twist(const float &r0, const float &r1, const float &r2,
+                        const float &x, const float &y, const float &z)
+        {
+            float norm = sqrt(r0*r0 + r1 * r1 + r2 * r2);
+            Quaternion<T> rotation;
+            if (norm > epsilon())
+            {
+                float cosNorm = cos(norm);
+                float sign = (cosNorm > 0.f) - (cosNorm < 0.f);
+                cosNorm *= sign;
+                float sinNorm_norm = sign * sin(norm) / norm;
+                rotation = Quaternion<T>(cosNorm, r0 * sinNorm_norm, r1 * sinNorm_norm, r2 * sinNorm_norm);
+            }
+            else
+                rotation = Quaternion<T>();
+
+            *this = DualQuaternion<T>(Quaternion<T>(0, x, y, z), rotation);
+        }
+
+        std::pair<T,T> magnitude()
+        {
+            DualQuaternion result = (*this) * (*this).conjugate();
+            return std::make_pair(result.rotation_.w_, result.translation_.w_);
+        }
+
 
 	private:
 		Quaternion<T> rotation_;
@@ -185,6 +246,13 @@ namespace utils {
                          (1 - 2*((rotation_.y_*rotation_.y_) + (rotation_.z_*rotation_.z_))));
         }
 	};
+
+    template <typename T>
+    std::ostream &operator<<(std::ostream &os, const DualQuaternion<T> &q)
+    {
+        os << "[" << q.getRotation() << ", " << q.getTranslation()<< ", " << "]" << std::endl;
+        return os;
+    }
 
 } //namespace utils
 

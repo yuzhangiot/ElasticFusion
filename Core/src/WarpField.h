@@ -16,8 +16,9 @@ typedef nanoflann::KDTreeSingleIndexAdaptor<
 
 struct deformation_node
 {
-	Eigen::Vector4f vertex;
+	Eigen::Vector3f vertex;
 	utils::DualQuaternion<float> transform;
+	float weight = 0;
 };
 
 class WarpField
@@ -29,7 +30,7 @@ public:
     void init(const std::vector<Eigen::Vector4f>& first_frame);
     void init(DynamicModel& dynamicModel);
 
-    void warp(std::vector<Eigen::Vector4f>& points, std::vector<Eigen::Vector3f>& normals) const;
+    std::vector<Eigen::Vector4f> warp(std::vector<Eigen::Vector4f>& points, std::vector<Eigen::Vector3f>& normals) const;
 
     utils::DualQuaternion<float> DQB(const Eigen::Vector4f& vertex) const;
 
@@ -38,6 +39,8 @@ public:
     void KNN(Eigen::Vector4f point) const;
 
     void buildKDTree();
+
+    float weighting(float squared_dist, float weight) const;
 
 private:
 	std::vector<deformation_node>* nodes_;

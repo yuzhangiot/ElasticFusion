@@ -7,7 +7,7 @@
 namespace utils{
 	struct PointCloud
 	    {
-	        std::vector<Eigen::Vector4f> pts;
+	        std::vector<Eigen::Vector3f> pts;
 
 	        // Must return the number of data points
 	        inline size_t kdtree_get_point_count() const { return pts.size(); }
