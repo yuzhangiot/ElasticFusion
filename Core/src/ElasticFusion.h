@@ -34,7 +34,6 @@
 #include "Ferns.h"
 #include "PoseMatch.h"
 #include "Defines.h"
-#include "WarpField.h"
 #include "WarpFieldOptimizer.h"
 
 #include <iomanip>

@@ -181,7 +181,16 @@ ElasticFusion::~ElasticFusion()
 
 void ElasticFusion::createWarp(float confidenceThreshold) {
   warp_ = new WarpField(confidenceThreshold);
-  optimiser_ = new WarpFieldOptimizer();
+
+  CombinedSolverParameters solverParameters;
+  solverParameters.numIter = 5;
+  solverParameters.nonLinearIter = 5;
+  solverParameters.linearIter = 100;
+  solverParameters.useOpt = false;
+  solverParameters.useOptLM = true;
+  solverParameters.earlyOut = true;
+
+  optimiser_ = new WarpFieldOptimizer(warp_, solverParameters);
 }
 
 void ElasticFusion::createTextures()

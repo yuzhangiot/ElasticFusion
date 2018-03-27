@@ -1,4 +1,5 @@
-#pragma once
+#ifndef COMBINED_SOLVER_H_
+#define COMBINED_SOLVER_H_
 
 #include <cuda_runtime.h>
 #include <cuda_profiler_api.h>
@@ -18,8 +19,8 @@
 class CombinedSolver : public CombinedSolverBase
 {
 public:
-	CombinedSolver(WarpField* warpField, CombinedSolverParameters param) {
-		// m_combinedSolverParameters = params;
+	CombinedSolver(WarpField* warpField, CombinedSolverParameters params) {
+		m_combinedSolverParameters = params;
         m_warp = warpField;
 	}
 	~CombinedSolver(){};
@@ -74,7 +75,7 @@ public:
         std::vector<float3> h_live_vertices(N);
         std::vector<float3> h_live_normals(N);
 
-        for(int i = 0; i < N; i++)
+        for(int i = 0; i < (int)N; i++)
         {
 //            FIXME: this code could look better
             if(std::isnan(m_canonicalVerticesEigen[i][0]) ||
@@ -108,7 +109,7 @@ public:
         std::vector<float3> h_translation(D);
         std::vector<float3> h_rotation(D);
 
-        for(int i = 0; i < m_warp->getNodes()->size(); i++)
+        for(int i = 0; i < (int)m_warp->getNodes()->size(); i++)
         {
             float x,y,z;
             auto t = m_warp->getNodes()->at(i).transform;
@@ -131,11 +132,11 @@ public:
 //        std::vector<float> weights(N * KNN_NEIGHBOURS);
         std::vector<float[KNN_NEIGHBOURS]> weights(N);
 //FIXME: KNN doesn't need to be recomputed every time.
-        for(int count = 0; count < canonical_vertices.size(); count++)
+        for(int count = 0; count < (int)canonical_vertices.size(); count++)
         {
             graph_vector[0].push_back(count);
             m_warp->getWeightsAndUpdateKNN(canonical_vertices[count], weights[count]);
-            for(int i = 1; i < graph_vector.size(); i++)
+            for(int i = 1; i < (int)graph_vector.size(); i++)
                 graph_vector[i].push_back((int)m_warp->getRetIndex()->at(i-1));
         }
         m_weights->update(weights);
@@ -227,3 +228,9 @@ private:
     float m_trust_region_radius;
 	
 };
+
+
+
+
+
+#endif

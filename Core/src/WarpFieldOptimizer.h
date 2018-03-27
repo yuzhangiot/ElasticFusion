@@ -8,8 +8,21 @@
 class WarpFieldOptimizer
 {
 public:
-	WarpFieldOptimizer();
+	WarpFieldOptimizer(WarpField *warp, CombinedSolver *solver);
+
+	WarpFieldOptimizer(WarpField *warp, CombinedSolverParameters params);
+
 	~WarpFieldOptimizer();
+
+	void optimiseWarpData(const std::vector<Eigen::Vector3f> &canonical_vertices,
+                              const std::vector<Eigen::Vector3f> &canonical_normals,
+                              const std::vector<Eigen::Vector3f> &live_vertices,
+                              const std::vector<Eigen::Vector3f> &live_normals);
+
+
+private:
+    WarpField *warp_;
+    CombinedSolver *solver_;
 	
 };
 
