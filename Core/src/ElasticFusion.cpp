@@ -805,7 +805,7 @@ void ElasticFusion::dynamicFusion() {
 
   warp_->warp(canonical, canonical_normals);
 
-  // optimiser_->optimiseWarpData(canonical, canonical_normals, live, canonical_normals);
+  optimiser_->optimiseWarpData(canonical, canonical_normals, live, canonical_normals);
 
 }
 

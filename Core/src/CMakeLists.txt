@@ -61,7 +61,6 @@ if(WIN32)
 endif()
 
 
-
 add_library(efusion SHARED 
             ${srcs}
             ${utils_srcs}
@@ -78,14 +77,19 @@ add_library(efusion SHARED
             ${containers_hdrs}
 )
 
+target_compile_definitions(efusion PUBLIC SOLVER_PATH=${CMAKE_CURRENT_SOURCE_DIR}/Solvers/)
+
+
 target_link_libraries(efusion
                       ${Eigen_LIBRARIES}
                       ${Pangolin_LIBRARIES}
+                      ${OPT_LIBRARIES}
+                      ${TERRA_LIBRARIES}
+                      ${CUDA_CUDART_LIBRARY}
                       ${CUDA_LIBRARIES}
                       ${SUITESPARSE_LIBRARIES}
 					            ${EXTRA_WINDOWS_LIBS}
-                      ${OPT_LIBRARIES}
-                      ${TERRA_LIBRARIES}
+                      
 )
 
 INSTALL(TARGETS efusion

@@ -76,6 +76,7 @@ endif()
 set(CMAKE_CXX_FLAGS ${ADDITIONAL_CMAKE_CXX_FLAGS} "-O3 -msse2 -msse3 -Wall -std=c++11")
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall -std=c++11")
 
+
 add_executable(ElasticFusion 
                ${srcs}
                ${tools_srcs}
@@ -83,10 +84,16 @@ add_executable(ElasticFusion
                ${tools_hdrs}
 )
 
+#target_compile_definitions(ElasticFusion PUBLIC SOLVER_PATH=${CMAKE_CURRENT_SOURCE_DIR}/Solvers/)
+
+
 target_link_libraries(ElasticFusion
 					  ${EXTRA_WINDOWS_LIBS}
                       ${ZLIB_LIBRARY}
                       ${Pangolin_LIBRARIES}
+                      ${OPT_LIBRARIES}
+                      ${TERRA_LIBRARIES}
+                      ${CUDA_CUDART_LIBRARY}
                       ${CUDA_LIBRARIES}
                       ${EXTRA_LIBS}
                       ${EFUSION_LIBRARY}
@@ -94,8 +101,6 @@ target_link_libraries(ElasticFusion
                       ${SUITESPARSE_LIBRARIES}
                       ${BLAS_LIBRARIES}
                       ${LAPACK_LIBRARIES}
-                      ${OPT_LIBRARIES}
-                      ${TERRA_LIBRARIES}
 )
 
 
@@ -104,5 +109,3 @@ INSTALL(TARGETS ElasticFusion
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
 )
-
-target_compile_definitions(ElasticFusion PUBLIC SOLVER_PATH=${CMAKE_CURRENT_SOURCE_DIR}/Solvers/)
