@@ -814,7 +814,7 @@ void ElasticFusion::dynamicFusion() {
   //4 project warped canonical to 2D to find coors, then find cur depth according to these coors, and empty these areas
   // then KNN these area depth
   // in the end, project left depth to dynamicModel
-  DeviceArray2D<unsigned short> cur_depth;
+  DeviceArray2D<ushort> cur_depth;
   std::vector<float> ro = dynamicModel.psdf(canonical, cur_depth);
 
 }

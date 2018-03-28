@@ -671,3 +671,48 @@ void projectToPointCloud(const DeviceArray2D<float> & depth,
     cudaSafeCall ( cudaGetLastError () );
     cudaSafeCall (cudaDeviceSynchronize ());
 }
+
+texture<float, 2> depth_tex(0, cudaFilterModePoint, cudaAddressModeBorder, cudaCreateChannelDescHalf());
+
+__global__
+void project_kernel(const Projector proj, PtrStep<float4> points, PtrStepSz<ushort> depth, int rows, int cols)
+{
+
+    int x = threadIdx.x + blockIdx.x * blockDim.x;
+    int y = threadIdx.y + blockIdx.y * blockDim.y;
+    float qnan = __int_as_float(0x7fffffff);
+    if (x < cols || y < rows) {
+        float4 pt = points.ptr(y)[x];
+        if(isnan(pt.x) || isnan(pt.y) || isnan(pt.z))
+            return;
+        float3 point = make_float3(pt.x, pt.y, pt.z);
+        float2 coo = proj(point);
+        if (coo.x < 0 || coo.y < 0 || coo.y >= rows || coo.x >= cols)
+        {
+            points.ptr(y)[x] = make_float4(qnan, qnan, qnan, 0.f);
+            return;
+        }
+
+        float Dp = tex2D(depth_tex, coo.x, coo.y);
+        depth.ptr((int)coo.y)[(int)coo.x] = 0;
+        points.ptr(y)[x] = make_float4(coo.x * Dp, coo.y * Dp, Dp, 0.f);
+    }
+}
+
+void cuda_project_and_remove(DeviceArray2D<ushort>& cur_depth,
+                            DeviceArray2D<float4>& points,
+                            const Projector projector) {
+    depth_tex.filterMode = cudaFilterModePoint;
+    depth_tex.addressMode[0] = cudaAddressModeBorder;
+    depth_tex.addressMode[1] = cudaAddressModeBorder;
+    depth_tex.addressMode[2] = cudaAddressModeBorder;
+
+    cudaChannelFormatDesc desc = cudaCreateChannelDescHalf();
+    cudaBindTexture2D(0, depth_tex, cur_depth.ptr(), desc, cur_depth.cols(), cur_depth.rows(), cur_depth.step());
+
+    dim3 block(32, 8);
+    dim3 grid(getGridDim(points.cols(), block.x), getGridDim(points.rows(), block.y));
+
+    project_kernel<<<grid, block>>>(projector, PtrStep<float4>(points), PtrStepSz<ushort>(cur_depth), cur_depth.rows(), cur_depth.cols());
+    cudaSafeCall ( cudaGetLastError () );
+}

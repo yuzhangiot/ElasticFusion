@@ -13,6 +13,8 @@
 #include <pangolin/gl/gl.h>
 #include <Eigen/LU>
 
+#include "Cuda/cudafuncs.cuh"
+
 #include "Defines.h"
 
 class DynamicModel

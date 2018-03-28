@@ -61,6 +61,7 @@
 #include "containers/device_array.hpp"
 #include "types.cuh"
 
+
 void icpStep(const mat33& Rcurr,
              const float3& tcurr,
              const DeviceArray2D<float>& vmap_curr,
@@ -175,5 +176,9 @@ void pyrDownUcharGauss(const DeviceArray2D<unsigned char>& src,
 void computeDerivativeImages(DeviceArray2D<unsigned char>& src,
                              DeviceArray2D<short>& dx,
                              DeviceArray2D<short>& dy);
+
+void cuda_project_and_remove(DeviceArray2D<ushort>& cur_depth,
+                            DeviceArray2D<float4>& points,
+                            const Projector projector);
 
 #endif /* CUDA_CUDAFUNCS_CUH_ */

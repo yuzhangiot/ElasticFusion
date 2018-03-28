@@ -180,4 +180,44 @@ struct JtJJtrSO3
     }
 };
 
+// from 3D to 2D
+struct Projector
+{
+    float fx_, fy_, cx_, cy_;
+    Projector(){}
+    Projector(float fx, float fy, float cx, float cy)
+    :
+     fx_(fx),
+     fy_(fy),
+     cx_(cx),
+     cy_(cy)
+     {};
+    __device__ __forceinline__ float2 operator()(const float3& p) const {
+        float2 coo;
+        coo.x = p.x / p.z * fx_ + cx_;
+        coo.y = p.y / p.z * fy_ + cy_;
+        return coo;
+    };
+};
+
+struct Reprojector
+{
+    Reprojector() {}
+    Reprojector(float fx, float fy, float cx, float cy)
+    :
+     fxinv_(1.0f / fx),
+     fyinv_(1.0f / fy),
+     cx_(cx),
+     cy_(cy)
+     {};
+    float fxinv_, fyinv_, cx_, cy_;
+    __device__ __forceinline__  float3 operator()(int u, int v, float z) const {
+        float3 point;
+        point.x = z * (u - cx_) * fxinv_;
+        point.y = z * (v - cy_) * fyinv_;
+        point.z = z;
+        return point;
+    };
+};
+
 #endif /* CUDA_TYPES_CUH_ */

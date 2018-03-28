@@ -458,7 +458,26 @@ void DynamicModel::fuse(const Eigen::Matrix4f & pose,
     TOCK("Fuse::Update");
 }
 
-std::vector<float> DynamicModel::psdf(const std::vector<Eigen::Vector3f>& warped, DeviceArray2D<unsigned short>& cur_depth) {
+std::vector<float> DynamicModel::psdf(const std::vector<Eigen::Vector3f>& warped, DeviceArray2D<ushort>& cur_depth) {
+    Projector projector(Intrinsics::getInstance().fx(),
+                        Intrinsics::getInstance().fy(),
+                        Intrinsics::getInstance().cx(),
+                        Intrinsics::getInstance().cy());
+
+    std::vector<float4, std::allocator<float4>> point_type(warped.size());
+    for(int i = 0; i < warped.size(); i++)
+    {
+        point_type[i].x = warped[i][0];
+        point_type[i].y = warped[i][1];
+        point_type[i].z = warped[i][2];
+        point_type[i].w = 0.f;
+    }
+
+    DeviceArray2D<float4> points;
+    points.upload(point_type, cur_depth.cols());
+
+    cuda_project_and_remove(cur_depth, points, projector);
+
 
 }
 
