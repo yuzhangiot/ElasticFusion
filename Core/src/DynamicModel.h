@@ -9,6 +9,7 @@
 #include "IndexMap.h"
 #include "Utils/Stopwatch.h"
 #include "Utils/Intrinsics.h"
+#include "Utils/RGBDOdometry.h"
 #include <pangolin/gl/gl.h>
 #include <Eigen/LU>
 
@@ -71,6 +72,8 @@ public:
     EFUSION_API unsigned int lastCount();
 
     Eigen::Vector4f * downloadMap();
+
+    std::vector<float> psdf(const std::vector<Eigen::Vector3f>& warped, DeviceArray2D<unsigned short>& cur_depth);
 	
 
 private:

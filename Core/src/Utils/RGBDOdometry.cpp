@@ -742,6 +742,10 @@ std::vector<Eigen::Vector3f> RGBDOdometry::getCurNormal() {
     return liveNormal;
 }
 
+DeviceArray2D<unsigned short> RGBDOdometry::getDepthTmp() {
+    return depth_tmp[0];
+}
+
 
 
 

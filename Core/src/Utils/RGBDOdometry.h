@@ -72,6 +72,8 @@ class RGBDOdometry
 
         std::vector<Eigen::Vector3f> getCurNormal();
 
+        DeviceArray2D<unsigned short> getDepthTmp();
+
         float lastICPError;
         float lastICPCount;
         float lastRGBError;

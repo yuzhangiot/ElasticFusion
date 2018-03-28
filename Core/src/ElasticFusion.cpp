@@ -695,19 +695,21 @@ void ElasticFusion::processFrame(const unsigned char * rgb,
 
             dynamicFusion();
 
-            // std::cout << "rawGraph' size: " << rawGraph.size() << std::endl;
+
             dynamicModel.fuse(currPose,
-                             tick,
-                             textures[GPUTexture::RGB],
-                             textures[GPUTexture::DEPTH_METRIC],
-                             textures[GPUTexture::DEPTH_METRIC_FILTERED],
-                             indexMapDyn.indexTex(),
-                             indexMapDyn.vertConfTex(),
-                             indexMapDyn.colorTimeTex(),
-                             indexMapDyn.normalRadTex(),
-                             maxDepthProcessed,
-                             confidenceThreshold,
-                             weighting);
+                               tick,
+                               textures[GPUTexture::RGB],
+                               textures[GPUTexture::DEPTH_METRIC],
+                               textures[GPUTexture::DEPTH_METRIC_FILTERED],
+                               indexMapDyn.indexTex(),
+                               indexMapDyn.vertConfTex(),
+                               indexMapDyn.colorTimeTex(),
+                               indexMapDyn.normalRadTex(),
+                               maxDepthProcessed,
+                               confidenceThreshold,
+                               weighting);
+
+            // std::cout << "rawGraph' size: " << rawGraph.size() << std::endl;
 
             TICK("indexMap");
             // globalModel project to indexFrameBuffer (nothing changes, just project)
@@ -806,6 +808,14 @@ void ElasticFusion::dynamicFusion() {
   warp_->warp(canonical, canonical_normals);
 
   optimiser_->optimiseWarpData(canonical, canonical_normals, live, canonical_normals);
+
+  warp_->warp(canonical, canonical_normals);
+
+  //4 project warped canonical to 2D to find coors, then find cur depth according to these coors, and empty these areas
+  // then KNN these area depth
+  // in the end, project left depth to dynamicModel
+  DeviceArray2D<unsigned short> cur_depth;
+  std::vector<float> ro = dynamicModel.psdf(canonical, cur_depth);
 
 }
 

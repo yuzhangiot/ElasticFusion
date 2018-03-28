@@ -458,6 +458,10 @@ void DynamicModel::fuse(const Eigen::Matrix4f & pose,
     TOCK("Fuse::Update");
 }
 
+std::vector<float> DynamicModel::psdf(const std::vector<Eigen::Vector3f>& warped, DeviceArray2D<unsigned short>& cur_depth) {
+
+}
+
 void DynamicModel::clean(const Eigen::Matrix4f & pose,
                         const int & time,
                         GPUTexture * indexMap,
