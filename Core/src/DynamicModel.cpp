@@ -478,7 +478,22 @@ std::vector<float> DynamicModel::psdf(const std::vector<Eigen::Vector3f>& warped
 
     cuda_project_and_remove(cur_depth, points, projector);
 
+    int size;
+    points.download(point_type, size);
+    Eigen::Matrix3f K;
+    K << Intrinsics::getInstance().fx(), 0, Intrinsics::getInstance().cx(),
+         0, Intrinsics::getInstance().fy(), Intrinsics::getInstance().cy(),
+         0, 0, 1;
+    Eigen::Matrix3f K_inv = K.inverse();
 
+
+    std::vector<float> distances(warped.size());
+    for(int i = 0; i < warped.size(); i++) {
+        Eigen::Vector3f temp(point_type[i].x, point_type[i].y, point_type[i].z);
+        temp = K_inv * temp;
+        distances[i] = temp[2] = warped[i][2];
+    }
+    return distances;
 }
 
 void DynamicModel::clean(const Eigen::Matrix4f & pose,
