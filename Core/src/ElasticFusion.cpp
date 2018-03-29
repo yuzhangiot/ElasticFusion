@@ -235,6 +235,7 @@ void ElasticFusion::createTextures()
                                                       GL_LUMINANCE,
                                                       GL_FLOAT,
                                                       true);
+
 }
 
 void ElasticFusion::createCompute()
@@ -815,7 +816,57 @@ void ElasticFusion::dynamicFusion() {
   // then KNN these area depth
   // in the end, project left depth to dynamicModel
   DeviceArray2D<ushort> cur_depth;
-  std::vector<float> ro = dynamicModel.psdf(canonical, cur_depth);
+  cur_depth = frameToModelDyn.getDepthTmp();
+  std::vector<float> ro = dynamicModel.psdf(canonical, cur_depth); //project and remove
+
+  GPUTexture* resiD_tex = new GPUTexture(Resolution::getInstance().width(),
+                                                          Resolution::getInstance().height(),
+                                                          GL_LUMINANCE16UI_EXT,
+                                                          GL_LUMINANCE_INTEGER_EXT,
+                                                          GL_UNSIGNED_SHORT,
+                                                          false,
+                                                          true);
+
+
+  GPUTexture* resiD_m_tex = new GPUTexture(Resolution::getInstance().width(),
+                                                                 Resolution::getInstance().height(),
+                                                                 GL_LUMINANCE32F_ARB,
+                                                                 GL_LUMINANCE,
+                                                                 GL_FLOAT);
+
+  ComputePack* resiD_compac = new ComputePack(loadProgramFromFile("empty.vert", "depth_metric.frag", "quad.geom"),
+                                               resiD_m_tex->texture);
+
+  FeedbackBuffer* resiD_fbb = new FeedbackBuffer(loadProgramFromFile("vertex_feedback.vert", "vertex_feedback.geom"));
+
+  //copy residual depth to texture
+  ushort cur_depth_host[Resolution::getInstance().height()][Resolution::getInstance().width()];
+  cur_depth.download(cur_depth_host, cur_depth.cols() * sizeof(ushort));
+  resiD_tex->texture->Upload(cur_depth_host, GL_LUMINANCE_INTEGER_EXT, GL_UNSIGNED_SHORT);
+
+  std::vector<Uniform> uniforms;
+  uniforms.push_back(Uniform("maxD", depthCutoff));
+  resiD_compac->compute(resiD_tex->texture, &uniforms);
+  resiD_fbb->compute(textures[GPUTexture::RGB]->texture,
+                     resiD_m_tex->texture,
+                     tick,
+                     maxDepthProcessed);
+
+
+  dynamicModel.initialiseResidual(*resiD_fbb);
+
+  // 
+  for(size_t i = 0; i < ro.size(); i++)
+    {
+        // if diff is large
+        if(ro[i] > -0.03f) // > -0.03
+        {
+            // find k(10) nearest points around
+            warp_->KNN(canonical[i]);
+            // float weight = weighting(*(warp_field.getDistSquared()), KNN_NEIGHBOURS);
+            // float coeff = std::min(ro[i], trunc_dist_);
+        }
+    }
 
 }
 

@@ -26,6 +26,8 @@ public:
 	void initialise(const FeedbackBuffer & rawFeedback,
                         const FeedbackBuffer & filteredFeedback);
 
+  void initialiseResidual(const FeedbackBuffer & filteredFeedback);
+
 	static const int TEXTURE_DIMENSION;
     static const int MAX_VERTICES;
     static const int NODE_TEXTURE_DIMENSION;

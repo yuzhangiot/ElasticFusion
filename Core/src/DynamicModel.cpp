@@ -233,6 +233,53 @@ void DynamicModel::initialise(const FeedbackBuffer & rawFeedback,
     glFinish();
 }
 
+void DynamicModel::initialiseResidual(const FeedbackBuffer & filteredFeedback)
+{
+    initProgram->Bind();
+
+    glBindBuffer(GL_ARRAY_BUFFER, filteredFeedback.vbo);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, Vertex::SIZE, 0);
+
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, Vertex::SIZE, reinterpret_cast<GLvoid*>(sizeof(Eigen::Vector4f)));
+
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, Vertex::SIZE, reinterpret_cast<GLvoid*>(sizeof(Eigen::Vector4f) * 2));
+
+    glEnable(GL_RASTERIZER_DISCARD);
+
+    glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, vbos[target].second);
+
+    glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, vbos[target].first);
+
+    glBeginTransformFeedback(GL_POINTS);
+
+    glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, countQuery);
+
+    //It's ok to use either fid because both raw and filtered have the same amount of vertices
+    glDrawTransformFeedback(GL_POINTS, filteredFeedback.fid);
+
+    glEndTransformFeedback();
+
+    glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
+
+    glGetQueryObjectuiv(countQuery, GL_QUERY_RESULT, &count);
+
+    glDisable(GL_RASTERIZER_DISCARD);
+
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
+    glDisableVertexAttribArray(2);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, 0);
+
+    initProgram->Unbind();
+
+    glFinish();
+}
+
 void DynamicModel::renderPointCloud(pangolin::OpenGlMatrix mvp,
                                    const float threshold,
                                    const bool drawUnstable,
