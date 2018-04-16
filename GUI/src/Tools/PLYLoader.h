@@ -39,6 +39,13 @@
 using namespace std::experimental::filesystem;
 using namespace tinyply;
 
+struct SimplePLY
+{
+    int nums;
+    std::vector<Eigen::Vector4f> vertices;
+    std::vector<Eigen::Vector4f> normals;
+    std::vector<Eigen::Vector4f> colors;
+};
 
 
 class PLYLoader
@@ -48,14 +55,14 @@ class PLYLoader
 
         ~PLYLoader();
 
-        void readFile(path f_path, PlyFile& plyFile);
+        void readFile(path, SimplePLY&);
 
-        std::vector<PlyFile> readPath(std::string m_path);
+        std::vector<SimplePLY> readPath(std::string m_path);
 
 
 
     private:
-        std::vector<PlyFile> plyfiles;
+        std::vector<SimplePLY> plyfiles;
 };
 
 

@@ -51,7 +51,7 @@ class MainController
         GroundTruthOdometry * groundTruthOdometry;
         LogReader * logReader;
         PLYLoader * plyLoader;
-        std::vector<PlyFile> plyFiles;
+        std::vector<SimplePLY> plyFiles;
 
         bool iclnuim;
         std::string logFile;
