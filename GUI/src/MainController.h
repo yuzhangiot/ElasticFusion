@@ -23,6 +23,7 @@
 #include "Tools/GroundTruthOdometry.h"
 #include "Tools/RawLogReader.h"
 #include "Tools/LiveLogReader.h"
+#include "Tools/PLYLoader.h"
 
 #include <iostream>
 
@@ -49,10 +50,13 @@ class MainController
         GUI * gui;
         GroundTruthOdometry * groundTruthOdometry;
         LogReader * logReader;
+        PLYLoader * plyLoader;
+        std::vector<PLYFile> plyFiles;
 
         bool iclnuim;
         std::string logFile;
         std::string poseFile;
+        std::string plyFilePath;
 
         float confidence,
               depth,

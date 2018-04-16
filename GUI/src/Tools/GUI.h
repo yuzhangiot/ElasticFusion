@@ -106,9 +106,9 @@ class GUI
                                           .AddDisplay(pangolin::Display(GPUTexture::RGB))
                                           .AddDisplay(pangolin::Display(GPUTexture::DEPTH_NORM))
                                           .AddDisplay(pangolin::Display("ModelImg"))
-                                          .AddDisplay(pangolin::Display("Model"))
-                                          .AddDisplay(*resPlot)
-                                          .AddDisplay(*inPlot);
+                                          .AddDisplay(pangolin::Display("Model"));
+                                          // .AddDisplay(*resPlot)
+                                          // .AddDisplay(*inPlot);
             }
 
             pause = new pangolin::Var<bool>("ui.Pause", false, true);

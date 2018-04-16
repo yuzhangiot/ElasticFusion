@@ -77,6 +77,12 @@ MainController::MainController(int argc, char * argv[])
         groundTruthOdometry = new GroundTruthOdometry(poseFile);
     }
 
+    if(Parse::get().arg(argc, argv, "-ply", plyFilePath) > 0)
+    {
+        plyLoader = new PLYLoader();
+        plyLoader->readPath(plyFilePath);
+    }
+
     confidence = 10.0f;
     depth = 3.0f;
     icp = 10.0f;
@@ -289,6 +295,7 @@ void MainController::run()
                 // input: rgb, depth, output: updated RT, localModel and global model
                 eFusion->processFrame(logReader->rgb, logReader->depth, logReader->timestamp, currentPose, weightMultiplier);
 
+                // eFusion->processPly();
                 if(currentPose)
                 {
                     delete currentPose;
