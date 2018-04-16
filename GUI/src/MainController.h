@@ -26,6 +26,7 @@
 #include "Tools/PLYLoader.h"
 
 #include <iostream>
+#include <unistd.h>
 
 #ifndef MAINCONTROLLER_H_
 #define MAINCONTROLLER_H_

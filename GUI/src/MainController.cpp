@@ -297,6 +297,7 @@ void MainController::run()
                 // eFusion->processFrame(logReader->rgb, logReader->depth, logReader->timestamp, currentPose, weightMultiplier);
                 int cur = count % plyFiles.size();
                 eFusion->processPly(plyFiles[cur].nums, plyFiles[cur].vertices, plyFiles[cur].normals, plyFiles[cur].colors);
+                usleep(3300); // 100000 is 1 second, 3300 is 0.033 second (30fps)
 
                 if(currentPose)
                 {
