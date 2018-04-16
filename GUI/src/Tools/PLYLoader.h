@@ -22,20 +22,22 @@
 
 #include <stdio.h>
 #include <iostream>
+#include <algorithm>
+#include <vector>
 #include <string>
 #include <Eigen/Core>
 #include <experimental/filesystem>
+#include <sstream>
+#include <fstream>
+#include <cstring>
+#include <thread>
+#include <chrono>
+
+#include "tinyply.h"
+
 
 using namespace std::experimental::filesystem;
-using namespace std;
-
-struct PLYFile
-{
-    int nums;
-    std::vector<Eigen::Vector4f> positions;
-    std::vector<Eigen::Vector4f> normals;
-    std::vector<Eigen::Vector4f> colors;
-};
+using namespace tinyply;
 
 
 
@@ -46,14 +48,14 @@ class PLYLoader
 
         ~PLYLoader();
 
-        void readFile();
+        void readFile(path f_path, PlyFile& plyFile);
 
-        void readPath(std::string m_path);
+        std::vector<PlyFile> readPath(std::string m_path);
 
 
 
     private:
-        std::vector<PLYFile> plyfiles;
+        std::vector<PlyFile> plyfiles;
 };
 
 

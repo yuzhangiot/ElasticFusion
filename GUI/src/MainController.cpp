@@ -80,7 +80,7 @@ MainController::MainController(int argc, char * argv[])
     if(Parse::get().arg(argc, argv, "-ply", plyFilePath) > 0)
     {
         plyLoader = new PLYLoader();
-        plyLoader->readPath(plyFilePath);
+        plyFiles = plyLoader->readPath(plyFilePath);
     }
 
     confidence = 10.0f;
