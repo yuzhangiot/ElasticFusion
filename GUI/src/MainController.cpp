@@ -233,6 +233,7 @@ void MainController::launch()
 
 void MainController::run()
 {
+    int count = 0;
     while(!pangolin::ShouldQuit() && !((!logReader->hasMore()) && quiet) && !(eFusion->getTick() == end && quiet))
     {
         if(!gui->pause->Get() || pangolin::Pushed(*gui->step))
@@ -293,9 +294,10 @@ void MainController::run()
                 }
 
                 // input: rgb, depth, output: updated RT, localModel and global model
-                eFusion->processFrame(logReader->rgb, logReader->depth, logReader->timestamp, currentPose, weightMultiplier);
+                // eFusion->processFrame(logReader->rgb, logReader->depth, logReader->timestamp, currentPose, weightMultiplier);
+                int cur = count % plyFiles.size();
+                eFusion->processPly(plyFiles[cur].nums, plyFiles[cur].vertices, plyFiles[cur].normals, plyFiles[cur].colors);
 
-                // eFusion->processPly();
                 if(currentPose)
                 {
                     delete currentPose;
@@ -402,12 +404,12 @@ void MainController::run()
             }
             else
             {
-                eFusion->getGlobalModel().renderPointCloud(gui->s_cam.GetProjectionModelViewMatrix(),
+                eFusion->getDisplayModel().renderPointCloud(gui->s_cam.GetProjectionModelViewMatrix(),
                                                            eFusion->getConfidenceThreshold(),
                                                            gui->drawUnstable->Get(),
                                                            gui->drawNormals->Get(),
                                                            gui->drawColors->Get(),
-                                                           gui->drawPoints->Get(),
+                                                           true,//gui->drawPoints->Get(),
                                                            gui->drawWindow->Get(),
                                                            gui->drawTimes->Get(),
                                                            eFusion->getTick(),
@@ -587,5 +589,6 @@ void MainController::run()
         }
 
         TOCK("GUI");
+        ++count;
     }
 }

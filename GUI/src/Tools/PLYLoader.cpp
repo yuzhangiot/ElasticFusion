@@ -84,9 +84,9 @@ void PLYLoader::readFile(path f_path, SimplePLY& s_plyFile) {
 		memcpy(tmp_colors.data(), colors->buffer.get(), numColorsBytes);
 		s_plyFile.colors.resize(vertices->count);
 		for(auto i = 0; i < colors->count; ++i) {
-			s_plyFile.colors[i][0] = tmp_colors[i].x;
-			s_plyFile.colors[i][1] = tmp_colors[i].y;
-			s_plyFile.colors[i][2] = tmp_colors[i].z;
+			s_plyFile.colors[i][0] = tmp_colors[i].x / 255.0f;
+			s_plyFile.colors[i][1] = tmp_colors[i].y / 255.0f;
+			s_plyFile.colors[i][2] = tmp_colors[i].z / 255.0f;
 			s_plyFile.colors[i][3] = 1.0f;
 		}
 

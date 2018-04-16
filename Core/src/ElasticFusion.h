@@ -77,6 +77,11 @@ class ElasticFusion
                           const float weightMultiplier = 1.f,
                           const bool bootstrap = false);
 
+        EFUSION_API void processPly(const int nums,
+                                    const std::vector<Eigen::Vector4f>& vertices,
+                                    const std::vector<Eigen::Vector4f>& normals,
+                                    const std::vector<Eigen::Vector4f>& colors);
+
         /**
          * Predicts the current view of the scene, updates the [vertex/normal/image]Tex() members
          * of the indexMap class
@@ -94,7 +99,7 @@ class ElasticFusion
          * @return
          */
         EFUSION_API GlobalModel & getGlobalModel();
-
+        EFUSION_API DisplayModel & getDisplayModel();
         /**
          * This class contains the fern keyframe database
          * @return
@@ -269,6 +274,7 @@ class ElasticFusion
         RGBDOdometry frameToModel;
         RGBDOdometry modelToModel;
         GlobalModel globalModel;
+        DisplayModel displayModel;
         FillIn fillIn;
         Ferns ferns;
         Deformation localDeformation;

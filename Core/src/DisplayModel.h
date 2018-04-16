@@ -38,8 +38,10 @@ class DisplayModel
         DisplayModel();
         virtual ~DisplayModel();
 
-        void initialise(const FeedbackBuffer & rawFeedback,
-                        const FeedbackBuffer & filteredFeedback);
+        void initialise(const int nums,
+                        const std::vector<Eigen::Vector4f>& vertices,
+                        const std::vector<Eigen::Vector4f>& normals,
+                        const std::vector<Eigen::Vector4f>& colors);
 
         static const int TEXTURE_DIMENSION;
         static const int MAX_VERTICES;
