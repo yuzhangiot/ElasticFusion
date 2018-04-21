@@ -64,6 +64,17 @@ class DisplayModel
                               const int time,
                               const int timeDelta);
 
+        EFUSION_API void renderTriangleCloud(pangolin::OpenGlMatrix mvp,
+                              const float threshold,
+                              const bool drawUnstable,
+                              const bool drawNormals,
+                              const bool drawColors,
+                              const bool drawPoints,
+                              const bool drawWindow,
+                              const bool drawTimes,
+                              const int time,
+                              const int timeDelta);
+
         EFUSION_API const std::pair<GLuint, GLuint> & model();
 
         void fuse(const Eigen::Matrix4f & pose,
@@ -110,6 +121,7 @@ class DisplayModel
         std::shared_ptr<Shader> initProgramOff;
         std::shared_ptr<Shader> drawProgram;
         std::shared_ptr<Shader> drawSurfelProgram;
+        std::shared_ptr<Shader> drawTriangleProgram;
 
         //For supersample fusing
         std::shared_ptr<Shader> dataProgram;

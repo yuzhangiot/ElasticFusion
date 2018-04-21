@@ -32,6 +32,7 @@ DisplayModel::DisplayModel()
    initProgramOff(loadProgramFromFile("init_unstable_display_off.vert")),
    drawProgram(loadProgramFromFile("draw_feedback.vert", "draw_feedback.frag")),
    drawSurfelProgram(loadProgramFromFile("draw_global_surface.vert", "draw_global_surface.frag", "draw_global_surface.geom")),
+   drawTriangleProgram(loadProgramFromFile("draw_display_triangle.vert", "draw_display_triangle.frag")),
    dataProgram(loadProgramFromFile("data.vert", "data.frag", "data.geom")),
    updateProgram(loadProgramFromFile("update.vert")),
    unstableProgram(loadProgramGeomFromFile("copy_unstable.vert", "copy_unstable.geom")),
@@ -459,6 +460,50 @@ void DisplayModel::renderPointCloud(pangolin::OpenGlMatrix mvp,
     glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, Vertex::SIZE, reinterpret_cast<GLvoid*>(sizeof(Eigen::Vector4f) * 2));
 
     glDrawTransformFeedback(GL_POINTS, vbos[target].second);
+
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
+    glDisableVertexAttribArray(2);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    program->Unbind();
+}
+
+void DisplayModel::renderTriangleCloud(pangolin::OpenGlMatrix mvp,
+                                   const float threshold,
+                                   const bool drawUnstable,
+                                   const bool drawNormals,
+                                   const bool drawColors,
+                                   const bool drawPoints,
+                                   const bool drawWindow,
+                                   const bool drawTimes,
+                                   const int time,
+                                   const int timeDelta)
+{
+    std::shared_ptr<Shader> program = drawPoints ? drawProgram : drawTriangleProgram;
+
+    program->Bind();
+
+    program->setUniform(Uniform("MVP", mvp));
+
+    Eigen::Matrix4f pose = Eigen::Matrix4f::Identity();
+    //This is for the point shader
+    program->setUniform(Uniform("pose", pose));
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbos[target].first);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, Vertex::SIZE, 0);
+
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, Vertex::SIZE, reinterpret_cast<GLvoid*>(sizeof(Eigen::Vector4f) * 1));
+
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, Vertex::SIZE, reinterpret_cast<GLvoid*>(sizeof(Eigen::Vector4f) * 2));
+
+    glDrawTransformFeedback(GL_TRIANGLES, vbos[target].second);
+
+    // glDrawTransformFeedback(GL_POINTS, vbos[target].second);
 
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);

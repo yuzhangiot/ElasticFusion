@@ -37,6 +37,7 @@ void main()
     // vColor0 = vec4(0,0,0,0);
     vNormRad0 = vec4(0,0,0,0);
 
-    vColor0 = vec4(encodeColor(vec3(vColor)), 0, 0, 1);
+    // vColor0 = vec4(encodeColor(vec3(vColor)), 0, 0, 1);
+    vColor0 = vColor;
     // vNormRad0 = vec4(vec3(vNormRad), getRadius(vPosition.z, vNormRad.z));
 }

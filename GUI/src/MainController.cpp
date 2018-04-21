@@ -240,11 +240,11 @@ void MainController::launch()
 void MainController::run()
 {
     int count = 0;
-    while(!pangolin::ShouldQuit() && !((!logReader->hasMore()) && quiet) && !(eFusion->getTick() == end && quiet))
+    while(!pangolin::ShouldQuit())
     {
         if(!gui->pause->Get() || pangolin::Pushed(*gui->step))
         {
-            if((logReader->hasMore() || rewind) && eFusion->getTick() < end)
+            // if((logReader->hasMore() || rewind) && eFusion->getTick() < end)
             {
                 TICK("LogRead");
                 if(rewind)
@@ -419,12 +419,23 @@ void MainController::run()
             }
             else
             {
-                eFusion->getDisplayModel().renderPointCloud(gui->s_cam.GetProjectionModelViewMatrix(),
+                // eFusion->getDisplayModel().renderPointCloud(gui->s_cam.GetProjectionModelViewMatrix(),
+                //                                            eFusion->getConfidenceThreshold(),
+                //                                            gui->drawUnstable->Get(),
+                //                                            gui->drawNormals->Get(),
+                //                                            gui->drawColors->Get(),
+                //                                            true,//gui->drawPoints->Get(),
+                //                                            gui->drawWindow->Get(),
+                //                                            gui->drawTimes->Get(),
+                //                                            eFusion->getTick(),
+                //                                            eFusion->getTimeDelta());
+
+                eFusion->getDisplayModel().renderTriangleCloud(gui->s_cam.GetProjectionModelViewMatrix(),
                                                            eFusion->getConfidenceThreshold(),
                                                            gui->drawUnstable->Get(),
                                                            gui->drawNormals->Get(),
                                                            gui->drawColors->Get(),
-                                                           true,//gui->drawPoints->Get(),
+                                                           gui->drawPoints->Get(),
                                                            gui->drawWindow->Get(),
                                                            gui->drawTimes->Get(),
                                                            eFusion->getTick(),
