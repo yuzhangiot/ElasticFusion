@@ -83,6 +83,12 @@ MainController::MainController(int argc, char * argv[])
         plyFiles = plyLoader->readPath(plyFilePath);
     }
 
+    if(Parse::get().arg(argc, argv, "-off", offFilePath) > 0)
+    {
+        offLoader = new OFFLoader();
+        offFiles = offLoader->readPath(offFilePath);
+    }
+
     confidence = 10.0f;
     depth = 3.0f;
     icp = 10.0f;
@@ -295,9 +301,17 @@ void MainController::run()
 
                 // input: rgb, depth, output: updated RT, localModel and global model
                 // eFusion->processFrame(logReader->rgb, logReader->depth, logReader->timestamp, currentPose, weightMultiplier);
-                int cur = count % plyFiles.size();
-                eFusion->processPly(plyFiles[cur].nums, plyFiles[cur].vertices, plyFiles[cur].normals, plyFiles[cur].colors);
-                usleep(3300); // 100000 is 1 second, 3300 is 0.033 second (30fps)
+                if(!plyFilePath.empty()) {
+                    int cur = count % plyFiles.size();
+                    eFusion->processPly(plyFiles[cur].nums, plyFiles[cur].vertices, plyFiles[cur].normals, plyFiles[cur].colors);
+                    usleep(3300); // 100000 is 1 second, 3300 is 0.033 second (30fps)
+                }
+
+                if(!offFilePath.empty()) {
+                    int cur = count % offFiles.size();
+                    eFusion->processOff(offFiles[cur].nums, offFiles[cur].vertices, offFiles[cur].colors, offFiles[cur].faces);
+                    usleep(3300); // 100000 is 1 second, 3300 is 0.033 second (30fps)
+                }
 
                 if(currentPose)
                 {

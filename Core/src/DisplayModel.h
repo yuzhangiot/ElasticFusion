@@ -43,6 +43,11 @@ class DisplayModel
                         const std::vector<Eigen::Vector4f>& normals,
                         const std::vector<Eigen::Vector4f>& colors);
 
+        void initialiseOff(const int nums,
+                        const std::vector<Eigen::Vector4f>& vertices,
+                        const std::vector<Eigen::Vector4f>& colors,
+                        const std::vector<Eigen::Vector4f>& faces);
+
         static const int TEXTURE_DIMENSION;
         static const int MAX_VERTICES;
         static const int NODE_TEXTURE_DIMENSION;
@@ -102,6 +107,7 @@ class DisplayModel
         unsigned int count;
 
         std::shared_ptr<Shader> initProgram;
+        std::shared_ptr<Shader> initProgramOff;
         std::shared_ptr<Shader> drawProgram;
         std::shared_ptr<Shader> drawSurfelProgram;
 

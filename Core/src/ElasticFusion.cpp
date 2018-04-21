@@ -263,6 +263,14 @@ void ElasticFusion::processPly(const int nums,
   displayModel.initialise(nums, vertices, normals, colors);
 }
 
+void ElasticFusion::processOff(const int nums,
+                               const std::vector<Eigen::Vector4f>& vertices,
+                               const std::vector<Eigen::Vector4f>& colors,
+                               const std::vector<Eigen::Vector4f>& faces)
+{
+  displayModel.initialiseOff(nums, vertices, colors, faces);
+}
+
 void ElasticFusion::processFrame(const unsigned char * rgb,
                                  const unsigned short * depth,
                                  const int64_t & timestamp,

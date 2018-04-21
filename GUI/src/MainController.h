@@ -24,6 +24,7 @@
 #include "Tools/RawLogReader.h"
 #include "Tools/LiveLogReader.h"
 #include "Tools/PLYLoader.h"
+#include "Tools/OFFLoader.h"
 
 #include <iostream>
 #include <unistd.h>
@@ -52,12 +53,15 @@ class MainController
         GroundTruthOdometry * groundTruthOdometry;
         LogReader * logReader;
         PLYLoader * plyLoader;
+        OFFLoader * offLoader;
         std::vector<SimplePLY> plyFiles;
+        std::vector<SimpleOFF> offFiles;
 
         bool iclnuim;
         std::string logFile;
         std::string poseFile;
         std::string plyFilePath;
+        std::string offFilePath;
 
         float confidence,
               depth,

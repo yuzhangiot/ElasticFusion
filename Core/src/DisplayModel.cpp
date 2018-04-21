@@ -29,6 +29,7 @@ DisplayModel::DisplayModel()
    bufferSize(MAX_VERTICES * Vertex::SIZE),
    count(0),
    initProgram(loadProgramFromFile("init_unstable_display.vert")),
+   initProgramOff(loadProgramFromFile("init_unstable_display_off.vert")),
    drawProgram(loadProgramFromFile("draw_feedback.vert", "draw_feedback.frag")),
    drawSurfelProgram(loadProgramFromFile("draw_global_surface.vert", "draw_global_surface.frag", "draw_global_surface.geom")),
    dataProgram(loadProgramFromFile("data.vert", "data.frag", "data.geom")),
@@ -177,6 +178,50 @@ DisplayModel::DisplayModel()
     glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, 0);
 
     initProgram->Unbind();
+
+    initProgramOff->Bind();
+
+    int locInitOff[3] =
+    {
+        glGetVaryingLocationNV(initProgramOff->programId(), "vPosition0"),
+        glGetVaryingLocationNV(initProgramOff->programId(), "vColor0"),
+        glGetVaryingLocationNV(initProgramOff->programId(), "vNormRad0"),
+    };
+
+    glTransformFeedbackVaryingsNV(initProgramOff->programId(), 3, locInit, GL_INTERLEAVED_ATTRIBS);
+
+    glGenQueries(1, &countQuery);
+
+    //Empty both transform feedbacks
+    glEnable(GL_RASTERIZER_DISCARD);
+
+    glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, vbos[0].second);
+
+    glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, vbos[0].first);
+
+    glBeginTransformFeedback(GL_POINTS);
+
+    glDrawArrays(GL_POINTS, 0, 0);
+
+    glEndTransformFeedback();
+
+    glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, 0);
+
+    glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, vbos[1].second);
+
+    glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, vbos[1].first);
+
+    glBeginTransformFeedback(GL_POINTS);
+
+    glDrawArrays(GL_POINTS, 0, 0);
+
+    glEndTransformFeedback();
+
+    glDisable(GL_RASTERIZER_DISCARD);
+
+    glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, 0);
+
+    initProgramOff->Unbind();
 }
 
 DisplayModel::~DisplayModel()
@@ -279,6 +324,92 @@ void DisplayModel::initialise(const int nums,
     glDeleteBuffers(1, &c_vbo);
 
     initProgram->Unbind();
+
+    glFinish();
+}
+
+void DisplayModel::initialiseOff(const int nums,
+                               const std::vector<Eigen::Vector4f>& vertices,
+                               const std::vector<Eigen::Vector4f>& colors,
+                               const std::vector<Eigen::Vector4f>& faces)
+{
+    // for(auto& v : colors)
+    //     std::cout << "colors: " << v << std::endl;
+
+    GLuint v_vbo;
+    glGenBuffers(1, &v_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, v_vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Eigen::Vector4f) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    GLuint c_vbo;
+    glGenBuffers(1, &c_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, c_vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Eigen::Vector4f) * colors.size(), colors.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    GLuint f_vbo;
+    glGenBuffers(1, &f_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, f_vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Eigen::Vector4f) * faces.size(), faces.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    initProgramOff->Bind();
+
+    Eigen::Vector4f cam(Intrinsics::getInstance().cx(),
+                  Intrinsics::getInstance().cy(),
+                  1.0f / Intrinsics::getInstance().fx(),
+                  1.0f / Intrinsics::getInstance().fy());
+
+    initProgramOff->setUniform(Uniform("cam", cam));
+
+    glBindBuffer(GL_ARRAY_BUFFER, v_vbo);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Eigen::Vector4f), 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, c_vbo);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Eigen::Vector4f), 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, f_vbo);
+
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Eigen::Vector4f), 0);
+
+    glEnable(GL_RASTERIZER_DISCARD);
+
+    glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, vbos[target].second);
+
+    glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, vbos[target].first);
+
+    glBeginTransformFeedback(GL_POINTS);
+
+    glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, countQuery);
+
+    // //It's ok to use either fid because both raw and filtered have the same amount of vertices
+    glDrawArrays(GL_POINTS, 0, nums);
+    // glDrawTransformFeedback(GL_POINTS, rawFeedback.fid);
+
+    glEndTransformFeedback();
+
+    glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
+
+    glGetQueryObjectuiv(countQuery, GL_QUERY_RESULT, &count);
+
+    glDisable(GL_RASTERIZER_DISCARD);
+
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
+    glDisableVertexAttribArray(2);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, 0);
+
+    glDeleteBuffers(1, &v_vbo);
+    glDeleteBuffers(1, &f_vbo);
+    glDeleteBuffers(1, &c_vbo);
+
+    initProgramOff->Unbind();
 
     glFinish();
 }

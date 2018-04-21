@@ -82,6 +82,11 @@ class ElasticFusion
                                     const std::vector<Eigen::Vector4f>& normals,
                                     const std::vector<Eigen::Vector4f>& colors);
 
+        EFUSION_API void processOff(const int nums,
+                               const std::vector<Eigen::Vector4f>& vertices,
+                               const std::vector<Eigen::Vector4f>& colors,
+                               const std::vector<Eigen::Vector4f>& faces);
+
         /**
          * Predicts the current view of the scene, updates the [vertex/normal/image]Tex() members
          * of the indexMap class
