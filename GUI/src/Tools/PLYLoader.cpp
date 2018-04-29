@@ -1,3 +1,5 @@
+
+
 #include "PLYLoader.h"
 
 using namespace std;
@@ -80,14 +82,17 @@ void PLYLoader::readFile(path f_path, SimplePLY& s_plyFile) {
 		}
 
 		const size_t numColorsBytes = colors->buffer.size_bytes();
-		vector<float3> tmp_colors(colors->count);
+		struct uchar3 { unsigned char x, y, z;};
+		vector<uchar3> tmp_colors(colors->count);
 		memcpy(tmp_colors.data(), colors->buffer.get(), numColorsBytes);
 		s_plyFile.colors.resize(vertices->count);
 		for(auto i = 0; i < colors->count; ++i) {
-			s_plyFile.colors[i][0] = tmp_colors[i].x / 255.0f;
-			s_plyFile.colors[i][1] = tmp_colors[i].y / 255.0f;
-			s_plyFile.colors[i][2] = tmp_colors[i].z / 255.0f;
+			s_plyFile.colors[i][0] = (float)tmp_colors[i].x / 255.f;
+			s_plyFile.colors[i][1] = (float)tmp_colors[i].y / 255.f;
+			s_plyFile.colors[i][2] = (float)tmp_colors[i].z / 255.f;
 			s_plyFile.colors[i][3] = 1.0f;
+			// if((float)tmp_colors[i].x != 0)
+			// 	std::cout << "r: " << (float)tmp_colors[i].x << ", g: " << (float)tmp_colors[i].y << ", b: " << (float)tmp_colors[i].z << std::endl;
 		}
 
 		const size_t numNormalsBytes = normals->buffer.size_bytes();

@@ -22,7 +22,18 @@ in vec4 vColor;
 
 out vec4 FragColor;
 
+uniform bool flip;
+
+
+
 void main()
 {
     FragColor = vColor;
+
+    if(flip) {
+    	FragColor = vec4(vColor.z, vColor.y, vColor.x, vColor.w);
+    }
+    else {
+    	FragColor = vColor;
+    }
 }

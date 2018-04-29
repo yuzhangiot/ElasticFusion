@@ -27,6 +27,7 @@ out vec4 vColor0;
 out vec4 vNormRad0;
 
 uniform vec4 cam; //cx, cy, 1/fx, 1/fy
+uniform bool flip;
 
 #include "color.glsl"
 #include "surfels.glsl"
@@ -34,9 +35,8 @@ uniform vec4 cam; //cx, cy, 1/fx, 1/fy
 void main()
 {
     vPosition0 = vec4(vec3(vPosition), 10000);
-    // vColor0 = vec4(0,0,0,0);
-    // vNormRad0 = vec4(0,0,0,0);
-
-    vColor0 = vec4(encodeColor(vec3(vColor)), 0, 0, 1);
     vNormRad0 = vec4(vec3(vNormRad), getRadius(vPosition.z, vNormRad.z));
+    vColor0 = vec4(encodeColor(vec3(vColor)), 0, 0, 1);
+
+
 }

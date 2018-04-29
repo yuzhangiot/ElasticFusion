@@ -256,7 +256,8 @@ void GlobalModel::renderPointCloud(pangolin::OpenGlMatrix mvp,
                                    const bool drawWindow,
                                    const bool drawTimes,
                                    const int time,
-                                   const int timeDelta)
+                                   const int timeDelta,
+                                   const bool flipColor)
 {
     std::shared_ptr<Shader> program = drawPoints ? drawProgram : drawSurfelProgram;
 

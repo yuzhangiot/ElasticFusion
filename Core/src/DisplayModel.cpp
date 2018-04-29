@@ -424,7 +424,8 @@ void DisplayModel::renderPointCloud(pangolin::OpenGlMatrix mvp,
                                    const bool drawWindow,
                                    const bool drawTimes,
                                    const int time,
-                                   const int timeDelta)
+                                   const int timeDelta,
+                                   const bool flipColor)
 {
     std::shared_ptr<Shader> program = drawPoints ? drawProgram : drawSurfelProgram;
 
@@ -447,6 +448,8 @@ void DisplayModel::renderPointCloud(pangolin::OpenGlMatrix mvp,
     Eigen::Matrix4f pose = Eigen::Matrix4f::Identity();
     //This is for the point shader
     program->setUniform(Uniform("pose", pose));
+
+    program->setUniform(Uniform("flip", flipColor));
 
     glBindBuffer(GL_ARRAY_BUFFER, vbos[target].first);
 
@@ -478,7 +481,8 @@ void DisplayModel::renderTriangleCloud(pangolin::OpenGlMatrix mvp,
                                    const bool drawWindow,
                                    const bool drawTimes,
                                    const int time,
-                                   const int timeDelta)
+                                   const int timeDelta,
+                                   const bool flipColor)
 {
     std::shared_ptr<Shader> program = drawPoints ? drawProgram : drawTriangleProgram;
 
@@ -489,6 +493,7 @@ void DisplayModel::renderTriangleCloud(pangolin::OpenGlMatrix mvp,
     Eigen::Matrix4f pose = Eigen::Matrix4f::Identity();
     //This is for the point shader
     program->setUniform(Uniform("pose", pose));
+    program->setUniform(Uniform("flip", flipColor));
 
     glBindBuffer(GL_ARRAY_BUFFER, vbos[target].first);
 

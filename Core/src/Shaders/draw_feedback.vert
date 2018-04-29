@@ -26,6 +26,7 @@ uniform mat4 MVP;
 uniform mat4 pose;
 uniform float threshold;
 uniform int colorType;
+uniform bool flip;
 
 out vec4 vColor;
 

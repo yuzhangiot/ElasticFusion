@@ -419,27 +419,35 @@ void MainController::run()
             }
             else
             {
-                // eFusion->getDisplayModel().renderPointCloud(gui->s_cam.GetProjectionModelViewMatrix(),
-                //                                            eFusion->getConfidenceThreshold(),
-                //                                            gui->drawUnstable->Get(),
-                //                                            gui->drawNormals->Get(),
-                //                                            gui->drawColors->Get(),
-                //                                            true,//gui->drawPoints->Get(),
-                //                                            gui->drawWindow->Get(),
-                //                                            gui->drawTimes->Get(),
-                //                                            eFusion->getTick(),
-                //                                            eFusion->getTimeDelta());
-
-                eFusion->getDisplayModel().renderTriangleCloud(gui->s_cam.GetProjectionModelViewMatrix(),
-                                                           eFusion->getConfidenceThreshold(),
-                                                           gui->drawUnstable->Get(),
-                                                           gui->drawNormals->Get(),
-                                                           gui->drawColors->Get(),
-                                                           gui->drawPoints->Get(),
-                                                           gui->drawWindow->Get(),
-                                                           gui->drawTimes->Get(),
-                                                           eFusion->getTick(),
-                                                           eFusion->getTimeDelta());
+                if(!plyFilePath.empty()) {
+                    eFusion->getDisplayModel().renderPointCloud(gui->s_cam.GetProjectionModelViewMatrix(),
+                                                               eFusion->getConfidenceThreshold(),
+                                                               gui->drawUnstable->Get(),
+                                                               gui->drawNormals->Get(),
+                                                               gui->drawColors->Get(),
+                                                               true,//gui->drawPoints->Get(),
+                                                               gui->drawWindow->Get(),
+                                                               gui->drawTimes->Get(),
+                                                               eFusion->getTick(),
+                                                               eFusion->getTimeDelta(),
+                                                               gui->flipColors);
+                }
+                else if(!offFilePath.empty()) {
+                    eFusion->getDisplayModel().renderTriangleCloud(gui->s_cam.GetProjectionModelViewMatrix(),
+                                                               eFusion->getConfidenceThreshold(),
+                                                               gui->drawUnstable->Get(),
+                                                               gui->drawNormals->Get(),
+                                                               gui->drawColors->Get(),
+                                                               gui->drawPoints->Get(),
+                                                               gui->drawWindow->Get(),
+                                                               gui->drawTimes->Get(),
+                                                               eFusion->getTick(),
+                                                               eFusion->getTimeDelta(),
+                                                               gui->flipColors);
+                }
+                else {
+                    std::cout << "Error: input file format is not ply or off!" << std::endl;
+                }
             }
             glFinish();
             TOCK("Global");

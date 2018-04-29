@@ -74,6 +74,7 @@ target_link_libraries(efusion
                       ${CUDA_LIBRARIES}
                       ${SUITESPARSE_LIBRARIES}
 					  ${EXTRA_WINDOWS_LIBS}
+            stdc++fs
 )
 
 INSTALL(TARGETS efusion
