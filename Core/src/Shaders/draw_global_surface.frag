@@ -25,12 +25,19 @@ flat in int unstablePoint;
 
 out vec4 FragColor;
 
+uniform bool flip;
+
 void main()
 {
     if(dot(texcoord, texcoord) > 1.0)
         discard;
-        
-    FragColor = vec4(vColor0, 1.0f);
+    
+    if(flip) {
+      FragColor = vec4(vColor0.z, vColor0.y, vColor0.x, 1.0);
+    }
+    else {
+      FragColor = vec4(vColor0, 1.0);
+    }
     
     if(unstablePoint == 1)
 	{

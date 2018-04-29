@@ -246,61 +246,6 @@ void MainController::run()
         {
             // if((logReader->hasMore() || rewind) && eFusion->getTick() < end)
             {
-                TICK("LogRead");
-                if(rewind)
-                {
-                    if(!logReader->hasMore())
-                    {
-                        logReader->getBack();
-                    }
-                    else
-                    {
-                        logReader->getNext();
-                    }
-
-                    if(logReader->rewound())
-                    {
-                        logReader->currentFrame = 0;
-                    }
-                }
-                else
-                {
-                    logReader->getNext();
-                }
-                TOCK("LogRead");
-
-                if(eFusion->getTick() < start)
-                {
-                    eFusion->setTick(start);
-                    logReader->fastForward(start);
-                }
-
-                float weightMultiplier = framesToSkip + 1;
-
-                if(framesToSkip > 0)
-                {
-                    eFusion->setTick(eFusion->getTick() + framesToSkip);
-                    logReader->fastForward(logReader->currentFrame + framesToSkip);
-                    framesToSkip = 0;
-                }
-
-                Eigen::Matrix4f * currentPose = 0;
-
-                if(groundTruthOdometry)
-                {
-                    currentPose = new Eigen::Matrix4f;
-                    currentPose->setIdentity();
-                    *currentPose = groundTruthOdometry->getTransformation(logReader->timestamp);
-                }
-
-                // fix camera position
-                if(fixCamera) {
-                    currentPose = new Eigen::Matrix4f;
-                    currentPose->setIdentity();
-                }
-
-                // input: rgb, depth, output: updated RT, localModel and global model
-                // eFusion->processFrame(logReader->rgb, logReader->depth, logReader->timestamp, currentPose, weightMultiplier);
                 if(!plyFilePath.empty()) {
                     int cur = count % plyFiles.size();
                     eFusion->processPly(plyFiles[cur].nums, plyFiles[cur].vertices, plyFiles[cur].normals, plyFiles[cur].colors);
@@ -313,20 +258,11 @@ void MainController::run()
                     usleep(3300); // 100000 is 1 second, 3300 is 0.033 second (30fps)
                 }
 
-                if(currentPose)
-                {
-                    delete currentPose;
-                }
-
                 if(frameskip && Stopwatch::getInstance().getTimings().at("Run") > 1000.f / 30.f)
                 {
                     framesToSkip = int(Stopwatch::getInstance().getTimings().at("Run") / (1000.f / 30.f));
                 }
             }
-        }
-        else
-        {
-            eFusion->predict();
         }
 
         TICK("GUI");
@@ -425,7 +361,7 @@ void MainController::run()
                                                                gui->drawUnstable->Get(),
                                                                gui->drawNormals->Get(),
                                                                gui->drawColors->Get(),
-                                                               true,//gui->drawPoints->Get(),
+                                                               gui->drawPoints->Get(),
                                                                gui->drawWindow->Get(),
                                                                gui->drawTimes->Get(),
                                                                eFusion->getTick(),
