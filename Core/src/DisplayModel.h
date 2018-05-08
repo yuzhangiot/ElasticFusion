@@ -75,7 +75,8 @@ class DisplayModel
                               const bool drawTimes,
                               const int time,
                               const int timeDelta,
-                              const bool flipColor);
+                              const bool flipColor,
+                              const std::vector<Eigen::Vector4f>& faces);
 
         EFUSION_API const std::pair<GLuint, GLuint> & model();
 

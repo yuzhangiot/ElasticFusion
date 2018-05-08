@@ -28,9 +28,19 @@ void OFFLoader::readFile(path f_path, SimpleOFF& s_offFile) {
 	std::istringstream ls_tag(line);
     std::string token;
     ls_tag >> token;
+    bool withColor = false;
 
     if (token == "COFF") {
-    	std::cout << "Header TAG is correct, continue reading" << std::endl;
+        withColor = true;
+    	std::cout << "Header TAG is correct, off file with color" << std::endl;
+    }
+    else if(token == "OFF") {
+        withColor = false;
+        std::cout << "Header TAG is correct, off file without color" << std::endl;
+    }
+    else {
+        std::cout << "Header TAG is incorrect, break" << std::endl;
+        return;
     }
 
     std::getline(ss, line);
@@ -57,9 +67,11 @@ void OFFLoader::readFile(path f_path, SimpleOFF& s_offFile) {
     	ls >> v_x;
     	ls >> v_y;
     	ls >> v_z;
-    	ls >> c_r;
-    	ls >> c_g;
-    	ls >> c_b;
+        if(withColor) {
+        	ls >> c_r;
+        	ls >> c_g;
+        	ls >> c_b;
+        }
 
     	s_offFile.vertices[vertex_id][0] = std::stof(v_x);
     	s_offFile.vertices[vertex_id][1] = std::stof(v_y);
@@ -68,9 +80,16 @@ void OFFLoader::readFile(path f_path, SimpleOFF& s_offFile) {
 
     	// cout << "color: " << c_r << ", " << c_g << ", " << c_b << endl;
 
-    	s_offFile.colors[vertex_id][0] = std::stof(c_r) / 255.f;
-    	s_offFile.colors[vertex_id][1] = std::stof(c_g) / 255.f;
-    	s_offFile.colors[vertex_id][2] = std::stof(c_b) / 255.f;
+        if(withColor) {
+        	s_offFile.colors[vertex_id][0] = std::stof(c_r) / 255.f;
+        	s_offFile.colors[vertex_id][1] = std::stof(c_g) / 255.f;
+        	s_offFile.colors[vertex_id][2] = std::stof(c_b) / 255.f;
+        }
+        else {
+            s_offFile.colors[vertex_id][0] = 1.f;
+            s_offFile.colors[vertex_id][1] = 1.f;
+            s_offFile.colors[vertex_id][2] = 1.f;
+        }
     	s_offFile.colors[vertex_id][3] = 1.f;
     }
 
@@ -78,11 +97,14 @@ void OFFLoader::readFile(path f_path, SimpleOFF& s_offFile) {
     for(auto face_id = 0; face_id < std::stoi(face_num); ++face_id) {
     	std::getline(ss, line);
     	std::istringstream ls(line);
-    	std::string f_x, f_y, f_z;
+    	std::string tmp_num, f_x, f_y, f_z;
+        if(!withColor) {
+            ls >> tmp_num;
+        }
     	ls >> f_x;
     	ls >> f_y;
     	ls >> f_z;
-
+        
     	s_offFile.faces[face_id][0] = std::stof(f_x);
     	s_offFile.faces[face_id][1] = std::stof(f_y);
     	s_offFile.faces[face_id][2] = std::stof(f_z);

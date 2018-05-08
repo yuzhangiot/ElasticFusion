@@ -369,6 +369,7 @@ void MainController::run()
                                                                gui->flipColors);
                 }
                 else if(!offFilePath.empty()) {
+                    int cur = count % offFiles.size();
                     eFusion->getDisplayModel().renderTriangleCloud(gui->s_cam.GetProjectionModelViewMatrix(),
                                                                eFusion->getConfidenceThreshold(),
                                                                gui->drawUnstable->Get(),
@@ -379,7 +380,8 @@ void MainController::run()
                                                                gui->drawTimes->Get(),
                                                                eFusion->getTick(),
                                                                eFusion->getTimeDelta(),
-                                                               gui->flipColors);
+                                                               gui->flipColors,
+                                                               offFiles[cur].faces);
                 }
                 else {
                     std::cout << "Error: input file format is not ply or off!" << std::endl;

@@ -482,9 +482,24 @@ void DisplayModel::renderTriangleCloud(pangolin::OpenGlMatrix mvp,
                                    const bool drawTimes,
                                    const int time,
                                    const int timeDelta,
-                                   const bool flipColor)
+                                   const bool flipColor,
+                                   const std::vector<Eigen::Vector4f>& faces)
 {
     std::shared_ptr<Shader> program = drawPoints ? drawProgram : drawTriangleProgram;
+
+    // create indices for element draw triangle
+    std::vector<unsigned short> indices;
+    for(int i = 0; i < faces.size(); ++i) {
+        Eigen::Vector4f face = faces[i];
+        indices.push_back((unsigned short)face[0]);
+        indices.push_back((unsigned short)face[1]);
+        indices.push_back((unsigned short)face[2]);
+    }
+
+    GLuint elementBuffer;
+    glGenBuffers(1, &elementBuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short), &indices[0], GL_STATIC_DRAW);
 
     program->Bind();
 
@@ -506,7 +521,9 @@ void DisplayModel::renderTriangleCloud(pangolin::OpenGlMatrix mvp,
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, Vertex::SIZE, reinterpret_cast<GLvoid*>(sizeof(Eigen::Vector4f) * 2));
 
-    glDrawTransformFeedback(GL_TRIANGLES, vbos[target].second);
+    // glDrawTransformFeedback(GL_TRIANGLES, vbos[target].second);
+
+    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, (void*)0);
 
     // glDrawTransformFeedback(GL_POINTS, vbos[target].second);
 
