@@ -84,6 +84,9 @@ void OFFLoader::readFile(path f_path, SimpleOFF& s_offFile) {
         	s_offFile.colors[vertex_id][0] = std::stof(c_r) / 255.f;
         	s_offFile.colors[vertex_id][1] = std::stof(c_g) / 255.f;
         	s_offFile.colors[vertex_id][2] = std::stof(c_b) / 255.f;
+            // s_offFile.colors[vertex_id][0] = 1.f;
+            // s_offFile.colors[vertex_id][1] = 1.f;
+            // s_offFile.colors[vertex_id][2] = 1.f;
         }
         else {
             s_offFile.colors[vertex_id][0] = 1.f;
@@ -98,13 +101,12 @@ void OFFLoader::readFile(path f_path, SimpleOFF& s_offFile) {
     	std::getline(ss, line);
     	std::istringstream ls(line);
     	std::string tmp_num, f_x, f_y, f_z;
-        if(!withColor) {
-            ls >> tmp_num;
-        }
+        
+        ls >> tmp_num;
     	ls >> f_x;
     	ls >> f_y;
     	ls >> f_z;
-        
+
     	s_offFile.faces[face_id][0] = std::stof(f_x);
     	s_offFile.faces[face_id][1] = std::stof(f_y);
     	s_offFile.faces[face_id][2] = std::stof(f_z);

@@ -487,6 +487,8 @@ void DisplayModel::renderTriangleCloud(pangolin::OpenGlMatrix mvp,
 {
     std::shared_ptr<Shader> program = drawPoints ? drawProgram : drawTriangleProgram;
 
+    // std::cout << "there are " << faces.size() << " faces" << std::endl;
+
     // create indices for element draw triangle
     std::vector<unsigned short> indices;
     for(int i = 0; i < faces.size(); ++i) {
