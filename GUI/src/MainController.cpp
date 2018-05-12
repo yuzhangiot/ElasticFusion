@@ -370,7 +370,21 @@ void MainController::run()
                 }
                 else if(!offFilePath.empty()) {
                     int cur = count % offFiles.size();
-                    eFusion->getDisplayModel().renderTriangleCloud(gui->s_cam.GetProjectionModelViewMatrix(),
+                    if(gui->drawPoints->Get()) {
+                        eFusion->getDisplayModel().renderPointCloud(gui->s_cam.GetProjectionModelViewMatrix(),
+                                                               eFusion->getConfidenceThreshold(),
+                                                               gui->drawUnstable->Get(),
+                                                               gui->drawNormals->Get(),
+                                                               false,
+                                                               true,
+                                                               gui->drawWindow->Get(),
+                                                               gui->drawTimes->Get(),
+                                                               eFusion->getTick(),
+                                                               eFusion->getTimeDelta(),
+                                                               gui->flipColors);
+                    }
+                    else {
+                        eFusion->getDisplayModel().renderTriangleCloud(gui->s_cam.GetProjectionModelViewMatrix(),
                                                                eFusion->getConfidenceThreshold(),
                                                                gui->drawUnstable->Get(),
                                                                gui->drawNormals->Get(),
@@ -382,6 +396,7 @@ void MainController::run()
                                                                eFusion->getTimeDelta(),
                                                                gui->flipColors,
                                                                offFiles[cur].faces);
+                    }
                 }
                 else {
                     std::cout << "Error: input file format is not ply or off!" << std::endl;
