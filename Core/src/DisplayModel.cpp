@@ -479,7 +479,7 @@ void DisplayModel::renderTriangleCloud(pangolin::OpenGlMatrix mvp,
                                    const bool drawColors,
                                    const bool drawPoints,
                                    const bool drawWindow,
-                                   const bool drawTimes,
+                                   const bool drawNormal,
                                    const int time,
                                    const int timeDelta,
                                    const bool flipColor,
@@ -503,6 +503,15 @@ void DisplayModel::renderTriangleCloud(pangolin::OpenGlMatrix mvp,
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short), &indices[0], GL_STATIC_DRAW);
 
+    glEnable(GL_DEPTH_TEST);
+
+    glDepthFunc(GL_LESS);
+
+    // Enable blending
+    glEnable(GL_BLEND);
+    
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     program->Bind();
 
     program->setUniform(Uniform("MVP", mvp));
@@ -511,6 +520,14 @@ void DisplayModel::renderTriangleCloud(pangolin::OpenGlMatrix mvp,
     //This is for the point shader
     program->setUniform(Uniform("pose", pose));
     program->setUniform(Uniform("flip", flipColor));
+
+    int drawMode = 0;
+    if(drawColors) drawMode = 1;
+    else if(drawNormals) drawMode = 2;
+    else drawMode = 0;
+    // std::cout << drawMode << std::endl;
+    program->setUniform(Uniform("drawMode", drawMode));
+
 
     glBindBuffer(GL_ARRAY_BUFFER, vbos[target].first);
 

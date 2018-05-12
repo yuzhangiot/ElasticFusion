@@ -35,9 +35,9 @@ uniform bool flip;
 void main()
 {
     vPosition0 = vec4(vec3(vPosition), 10000);
-    // vColor0 = vec4(0,0,0,0);
+    vColor0 = vColor;
+    // calculate normals
+    
     vNormRad0 = vec4(0,0,0,0);
 
-
-    vColor0 = vColor;
 }

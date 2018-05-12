@@ -343,65 +343,53 @@ void MainController::run()
             glFinish();
             TICK("Global");
 
-            if(gui->drawFxaa->Get())
-            {
-                gui->drawFXAA(gui->s_cam.GetProjectionModelViewMatrix(),
-                              gui->s_cam.GetModelViewMatrix(),
-                              eFusion->getGlobalModel().model(),
-                              eFusion->getConfidenceThreshold(),
-                              eFusion->getTick(),
-                              eFusion->getTimeDelta(),
-                              iclnuim);
+            if(!plyFilePath.empty()) {
+                eFusion->getDisplayModel().renderPointCloud(gui->s_cam.GetProjectionModelViewMatrix(),
+                                                           eFusion->getConfidenceThreshold(),
+                                                           gui->drawUnstable->Get(),
+                                                           gui->drawNormals->Get(),
+                                                           gui->drawColors->Get(),
+                                                           gui->drawPoints->Get(),
+                                                           gui->drawWindow->Get(),
+                                                           gui->drawTimes->Get(),
+                                                           eFusion->getTick(),
+                                                           eFusion->getTimeDelta(),
+                                                           gui->flipColors);
             }
-            else
-            {
-                if(!plyFilePath.empty()) {
+            else if(!offFilePath.empty()) {
+                int cur = count % offFiles.size();
+                if(gui->drawPoints->Get()) {
                     eFusion->getDisplayModel().renderPointCloud(gui->s_cam.GetProjectionModelViewMatrix(),
-                                                               eFusion->getConfidenceThreshold(),
-                                                               gui->drawUnstable->Get(),
-                                                               gui->drawNormals->Get(),
-                                                               gui->drawColors->Get(),
-                                                               gui->drawPoints->Get(),
-                                                               gui->drawWindow->Get(),
-                                                               gui->drawTimes->Get(),
-                                                               eFusion->getTick(),
-                                                               eFusion->getTimeDelta(),
-                                                               gui->flipColors);
-                }
-                else if(!offFilePath.empty()) {
-                    int cur = count % offFiles.size();
-                    if(gui->drawPoints->Get()) {
-                        eFusion->getDisplayModel().renderPointCloud(gui->s_cam.GetProjectionModelViewMatrix(),
-                                                               eFusion->getConfidenceThreshold(),
-                                                               gui->drawUnstable->Get(),
-                                                               gui->drawNormals->Get(),
-                                                               false,
-                                                               true,
-                                                               gui->drawWindow->Get(),
-                                                               gui->drawTimes->Get(),
-                                                               eFusion->getTick(),
-                                                               eFusion->getTimeDelta(),
-                                                               gui->flipColors);
-                    }
-                    else {
-                        eFusion->getDisplayModel().renderTriangleCloud(gui->s_cam.GetProjectionModelViewMatrix(),
-                                                               eFusion->getConfidenceThreshold(),
-                                                               gui->drawUnstable->Get(),
-                                                               gui->drawNormals->Get(),
-                                                               gui->drawColors->Get(),
-                                                               gui->drawPoints->Get(),
-                                                               gui->drawWindow->Get(),
-                                                               gui->drawTimes->Get(),
-                                                               eFusion->getTick(),
-                                                               eFusion->getTimeDelta(),
-                                                               gui->flipColors,
-                                                               offFiles[cur].faces);
-                    }
+                                                           eFusion->getConfidenceThreshold(),
+                                                           gui->drawUnstable->Get(),
+                                                           gui->drawNormals->Get(),
+                                                           false,
+                                                           true,
+                                                           gui->drawWindow->Get(),
+                                                           gui->drawTimes->Get(),
+                                                           eFusion->getTick(),
+                                                           eFusion->getTimeDelta(),
+                                                           gui->flipColors);
                 }
                 else {
-                    std::cout << "Error: input file format is not ply or off!" << std::endl;
+                    eFusion->getDisplayModel().renderTriangleCloud(gui->s_cam.GetProjectionModelViewMatrix(),
+                                                           eFusion->getConfidenceThreshold(),
+                                                           gui->drawUnstable->Get(),
+                                                           gui->drawNormals->Get(),
+                                                           gui->drawColors->Get(),
+                                                           gui->drawPoints->Get(),
+                                                           gui->drawWindow->Get(),
+                                                           gui->drawFxaa->Get(),
+                                                           eFusion->getTick(),
+                                                           eFusion->getTimeDelta(),
+                                                           gui->flipColors,
+                                                           offFiles[cur].faces);
                 }
             }
+            else {
+                std::cout << "Error: input file format is not ply or off!" << std::endl;
+            }
+
             glFinish();
             TOCK("Global");
         }
