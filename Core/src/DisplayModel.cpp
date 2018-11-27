@@ -371,12 +371,12 @@ void DisplayModel::initialiseOff(const int nums,
 
     glBindBuffer(GL_ARRAY_BUFFER, c_vbo);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Eigen::Vector4f), 0);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Eigen::Vector4f), reinterpret_cast<GLvoid*>(sizeof(Eigen::Vector4f) * 1));
 
     glBindBuffer(GL_ARRAY_BUFFER, f_vbo);
 
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Eigen::Vector4f), 0);
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Eigen::Vector4f), reinterpret_cast<GLvoid*>(sizeof(Eigen::Vector4f) * 2));
 
     glEnable(GL_RASTERIZER_DISCARD);
 
@@ -540,9 +540,12 @@ void DisplayModel::renderTriangleCloud(pangolin::OpenGlMatrix mvp,
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, Vertex::SIZE, reinterpret_cast<GLvoid*>(sizeof(Eigen::Vector4f) * 2));
 
-    // glDrawTransformFeedback(GL_TRIANGLES, vbos[target].second);
+    glDrawTransformFeedback(GL_TRIANGLES, vbos[target].second);
+    // glDrawTransformFeedback(GL_POINTS, vbos[target].second);
 
-    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, (void*)0);
+    // printf("indices: %d\n", indices.size());
+
+    // glDrawElements(GL_POINTS, indices.size(), GL_UNSIGNED_SHORT, (void*)0);
 
     // glDrawTransformFeedback(GL_POINTS, vbos[target].second);
 

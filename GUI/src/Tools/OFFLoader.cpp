@@ -38,6 +38,10 @@ void OFFLoader::readFile(path f_path, SimpleOFF& s_offFile) {
         withColor = false;
         std::cout << "Header TAG is correct, off file without color" << std::endl;
     }
+    else if(token == "NOFF") {
+        withColor = true;
+        std::cout << "Header TAG is correct, off file with normal" << std::endl;
+    }
     else {
         std::cout << "Header TAG is incorrect, break" << std::endl;
         return;
